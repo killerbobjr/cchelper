@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cce", "script\cce\cce.vcproj", "{5784B7CB-4265-435B-9BB4-CB2E93AD36DD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2AC2460B-7756-404D-A5D7-77CF14BF126B} = {2AC2460B-7756-404D-A5D7-77CF14BF126B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "evaluate_default", "script\evaluate_default\evaluate_default.vcproj", "{2AC2460B-7756-404D-A5D7-77CF14BF126B}"
 EndProject

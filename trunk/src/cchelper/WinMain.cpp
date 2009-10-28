@@ -7,8 +7,25 @@
 
 #define MAX_LOADSTRING	256
 
-/*
+#define MEDIAFILE(f)	_T("../../media/"##f)
 
+#define PIECEHV_RJ	(0xD2FC85BF)
+#define PIECEHV_RM	(0x17B56D39)
+#define PIECEHV_RX	(0xC4F9C567)
+#define PIECEHV_RS	(0x826AA68B)
+#define PIECEHV_RK	(0x18233962)
+#define PIECEHV_RP	(0x402355D8)
+#define PIECEHV_RB	(0x03A331A5)
+
+#define PIECEHV_BJ	(0x56FC44E8)
+#define PIECEHV_BM	(0x5699E66C)
+#define PIECEHV_BX	(0x7AA76288)
+#define PIECEHV_BS	(0x2BC9BFCC)
+#define PIECEHV_BK	(0x651E8CBB)
+#define PIECEHV_BP	(0x737E5B02)
+#define PIECEHV_BB	(0x9291F591)
+
+/*
 [D2FC85BF][17B56D39][C4F9C567][826AA68B][18233962][826AA68B][C4F9C567][17B56D39][D2FC85BF]
 [831D7709][C793D8C6][A2E9D8F9][DC8353E0][127F2FCE][6146BDDF][309BB9FD][5D5029F4][823C05F6]
 [14FBA89F][402355D8][D9E6CBDA][603A80C0][8A7A5CEC][C77D1B78][1379B3CF][402355D8][A33A6680]
@@ -19,6 +36,7 @@
 [541EAF84][737E5B02][1E0DA9D8][38632858][881CC997][25186C60][897868CC][737E5B02][C94C8A61]
 [4437F4F1][F4F08F5D][360E7182][739B5ADF][CD5B6E39][0BF693C1][98CF2FFC][8D454D36][0D554F46]
 [56FC44E8][5699E66C][7AA76288][2BC9BFCC][651E8CBB][2BC9BFCC][7AA76288][5699E66C][56FC44E8]
+
 
 [J]-[M]-[X]-[S]-[K]-[S]-[X]-[M]-[J]
  |   |   |   | + | + |   |   |   |
@@ -41,6 +59,34 @@
 <j>-<m>-<x>-<s>-<k>-<s>-<x>-<m>-<j>
 
 */
+
+struct PieceStruct
+{
+	char		cPiece;
+	DWORD		dwPieceHashValue;
+	TCHAR		* szPieceFile;
+	CFastDIB	* pDib;
+};
+
+#define PIECE_NUM	(14)
+
+PieceStruct g_tPieceStructs[PIECE_NUM] = {
+	{ 'J', PIECEHV_RJ, MEDIAFILE(_T("CRJ.BMP")), 0 },
+	{ 'M', PIECEHV_RM, MEDIAFILE(_T("CRM.BMP")), 0 },
+	{ 'X', PIECEHV_RX, MEDIAFILE(_T("CRX.BMP")), 0 },
+	{ 'S', PIECEHV_RS, MEDIAFILE(_T("CRS.BMP")), 0 },
+	{ 'K', PIECEHV_RK, MEDIAFILE(_T("CRK.BMP")), 0 },
+	{ 'P', PIECEHV_RP, MEDIAFILE(_T("CRP.BMP")), 0 },
+	{ 'B', PIECEHV_RB, MEDIAFILE(_T("CRB.BMP")), 0 },
+	{ 'j', PIECEHV_BJ, MEDIAFILE(_T("CBJ.BMP")), 0 },
+	{ 'm', PIECEHV_BM, MEDIAFILE(_T("CBM.BMP")), 0 },
+	{ 'x', PIECEHV_BX, MEDIAFILE(_T("CBX.BMP")), 0 },
+	{ 's', PIECEHV_BS, MEDIAFILE(_T("CBS.BMP")), 0 },
+	{ 'k', PIECEHV_BK, MEDIAFILE(_T("CBK.BMP")), 0 },
+	{ 'p', PIECEHV_BP, MEDIAFILE(_T("CBP.BMP")), 0 },
+	{ 'b', PIECEHV_BB, MEDIAFILE(_T("CBB.BMP")), 0 },
+};
+
 // Global Variables:
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
@@ -63,7 +109,8 @@ CQQNewChessWnd * g_pQcnWnd = NULL;
 POINT	g_ptMouse;
 int g_intAppRunning;
 HWND g_hWnd;
-CFastDIB * g_pMainSurface = NULL;
+CFastDIB *g_pMainSurface = NULL;
+CFastDIB *g_pBoardDIB	= NULL;
 
 struct WindowInformation
 {
@@ -73,32 +120,77 @@ struct WindowInformation
 	WINDOWINFO wi;
 } g_WinInfo;
 
-
-void DrawBackground()
+void LoadMedia()
 {
+	int i;
+	HRESULT hr;
+	for ( i = 0; i < PIECE_NUM; i++ )
+	{
+		if ( !g_tPieceStructs[i].pDib )
+		{
+			g_tPieceStructs[i].pDib = new CFastDIB();
 
-	HRESULT hr ;
+			hr = g_tPieceStructs[i].pDib->LoadFromFile(g_tPieceStructs[i].szPieceFile);
+			_CHECK(hr);
+		}
+	}
 
-	CFastDIB * fdib;
+	if ( !g_pBoardDIB )
+	{
+		g_pBoardDIB = new CFastDIB();
+		if ( g_pBoardDIB )
+		{
+			hr = g_pBoardDIB->LoadFromFile(MEDIAFILE(_T("CBOARD.BMP")));
+			_CHECK(hr);
+		}
+	}
+}
+
+void ReleaseMedia()
+{
+	int i;
+	for ( i = 0; i < PIECE_NUM; i++ )
+	{
+		if ( g_tPieceStructs[i].pDib )
+		{
+			delete g_tPieceStructs[i].pDib ;
+			g_tPieceStructs[i].pDib = NULL;
+		}
+	}
+
+	if ( g_pBoardDIB )
+	{
+		delete g_pBoardDIB ;
+		g_pBoardDIB = NULL;
+	}
+
+}
+
+
+void DrawPiece( PieceStruct& ps, int x , int y )
+{
+	ps.pDib->Draw( g_pMainSurface, 0, x * 18, y * 18 );
+}
+
+void DrawBoard()
+{
+	if ( g_pMainSurface )
+	{		
+		g_pBoardDIB->Draw( g_pMainSurface );
+		DrawPiece( g_tPieceStructs[0], 5, 3 );
+	}
+}
+
+void DrawMainSurface()
+{
 
 	HDC hdc = GetDC(g_hWnd);
 
-	if ( g_pMainSurface )
+	if ( g_pMainSurface && hdc )
 	{
-		fdib = new CFastDIB();
+		g_pMainSurface->FastBlt(hdc);
 
-		hr = fdib->LoadFromFile(_T("../../media/CBOARD.bmp"));
-		_CHECK(hr);
-		
-		if ( hr == S_OK )
-		{
-			_CHECK(fdib->Draw( g_pMainSurface ));
-		}
-
-		_CHECK(g_pMainSurface->FastBlt(hdc));
-
-		if ( fdib ) 
-			delete fdib;
+		ReleaseDC(g_hWnd, hdc);
 	}
 
 }
@@ -128,10 +220,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CCHELPER));
 	
 	CFastDIB::Initialize(1024,768);
+
 	g_pMainSurface = new CFastDIB();
 
 	_CHECK(g_pMainSurface->CreateDIB( 800, 600, FDIBTYPE_RGBA|FDIBTYPE_DOUBLEBUF ));
-	
+
+	LoadMedia();
 
 	g_pQcnWnd = new CQQNewChessWnd();
 
@@ -158,12 +252,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				g_pQcnWnd->FindQQNewChessWindow();
 			}
 
-			DrawBackground();
+			DrawBoard();
+
+			DrawMainSurface();
+			
 			Sleep(20);
 		}
 	}
 
-
+	ReleaseMedia();
 	return (int) msg.wParam;
 }
 
@@ -385,6 +482,8 @@ LRESULT CALLBACK WndProc(HWND g_hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			InvalidateRect(g_hWnd,NULL,FALSE);
 		}
 		break;
+	case WM_CREATE:
+
 	case WM_TIMER:
 		switch( wParam )
 		{

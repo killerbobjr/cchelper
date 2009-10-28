@@ -3,6 +3,7 @@
 #include "common.h"
 #include "Resource.h"
 #include "QQNewChessWnd.h"
+#include "fastdib.h"
 
 #define MAX_LOADSTRING	256
 
@@ -62,6 +63,7 @@ CQQNewChessWnd * g_pQcnWnd = NULL;
 POINT	g_ptMouse;
 int g_intAppRunning;
 HWND g_hWnd;
+CFastDIB * g_pMainSurface = NULL;
 
 struct WindowInformation
 {
@@ -70,6 +72,36 @@ struct WindowInformation
 	TCHAR szWindowClass[MAX_LOADSTRING];
 	WINDOWINFO wi;
 } g_WinInfo;
+
+
+void DrawBackground()
+{
+
+	HRESULT hr ;
+
+	CFastDIB * fdib;
+
+	HDC hdc = GetDC(g_hWnd);
+
+	if ( g_pMainSurface )
+	{
+		fdib = new CFastDIB();
+
+		hr = fdib->LoadFromFile(_T("../../media/CBOARD.bmp"));
+		_CHECK(hr);
+		
+		if ( hr == S_OK )
+		{
+			_CHECK(fdib->Draw( g_pMainSurface ));
+		}
+
+		_CHECK(g_pMainSurface->FastBlt(hdc));
+
+		if ( fdib ) 
+			delete fdib;
+	}
+
+}
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
 					   HINSTANCE hPrevInstance,
@@ -94,6 +126,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CCHELPER));
+	
+	CFastDIB::Initialize(1024,768);
+	g_pMainSurface = new CFastDIB();
+
+	_CHECK(g_pMainSurface->CreateDIB( 800, 600, FDIBTYPE_RGBA|FDIBTYPE_DOUBLEBUF ));
+	
 
 	g_pQcnWnd = new CQQNewChessWnd();
 
@@ -119,9 +157,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			{
 				g_pQcnWnd->FindQQNewChessWindow();
 			}
+
+			DrawBackground();
 			Sleep(20);
 		}
 	}
+
 
 	return (int) msg.wParam;
 }
@@ -290,6 +331,7 @@ LRESULT CALLBACK WndProc(HWND g_hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			DrawBoardRectPic(hdc);
 		}
 
+		
 		EndPaint(g_hWnd, &ps);
 		break;
 	case WM_KEYUP:
@@ -365,6 +407,13 @@ LRESULT CALLBACK WndProc(HWND g_hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		break;
 	case WM_DESTROY:
 		g_intAppRunning = FALSE;
+
+		if ( g_pMainSurface ) 
+		{
+			delete g_pMainSurface;
+			g_pMainSurface = NULL;
+		}
+
 		if ( g_pQcnWnd ) delete g_pQcnWnd;
 		PostQuitMessage(0);
 		break;

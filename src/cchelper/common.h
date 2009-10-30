@@ -3,7 +3,7 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <windows.h>
-
+#include <windowsx.h>
 // C RunTime Header Files
 #include <stdlib.h>
 #include <malloc.h>
@@ -11,4 +11,18 @@
 #include <tchar.h>
 #include <stdio.h>
 
-unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed );
+#include "fastdib.h"
+// DEFINES
+//___________________________________________________________________________
+
+#define MAX_LOADSTRING	256
+
+// Global variables
+//___________________________________________________________________________
+
+extern POINT		g_ptMouse;
+extern int			g_intAppRunning;
+extern BOOL			g_bActive;
+extern HWND			g_hWndMain;
+extern BOOL			g_bInitialized;
+extern CFastDIB		*g_pMainSurface;

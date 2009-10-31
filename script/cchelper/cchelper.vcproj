@@ -182,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\base\log.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\cchelper\QQNewChessWnd.cpp"
 				>
 			</File>
@@ -201,6 +205,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\cchelper\common.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\IGameWindow.h"
 				>
 			</File>
 			<File

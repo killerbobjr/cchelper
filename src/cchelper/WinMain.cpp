@@ -6,6 +6,7 @@
 #include "fastdib.h"
 #include "app.h"
 
+
 // STRUCTS
 //___________________________________________________________________________
 struct WindowInformation
@@ -66,7 +67,7 @@ void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
 
 	g_pMainSurface = new CFastDIB();
 
-	_CHECK(g_pMainSurface->CreateDIB( dwWidth, dwHeight, FDIBTYPE_RGBA|FDIBTYPE_DOUBLEBUF ));
+	g_pMainSurface->CreateDIB( dwWidth, dwHeight, FDIBTYPE_RGBA );
 
 }
 
@@ -117,7 +118,10 @@ BOOL doInit(HINSTANCE hInstance, int nCmdShow)
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CCHELPER));
 
-	SetWindowSize(210, 230);
+	SetWindowSize(230, 235);
+	//SetWindowSize(210, 235);
+
+	//SetTimer( g_hWndMain, APPUPDATE_TIMER, APPUPDATE_TIME_ELAPSE, 0 );
 
 	if(!InitApp())
 		return FALSE;
@@ -191,18 +195,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
             }
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }
-        else if(g_bActive) {
-			if (!AppLoop()) {
-			    DestroyWindow(g_hWndMain);
-			}else{
+        }else
+		{
+			if( !AppLoop() )
+				DestroyWindow(g_hWndMain);
+			else
 				doUpdate();
-			}
+			//WaitMessage();
 		}
-		else
-        {
-            WaitMessage();
-        }
+
     }
 
 
@@ -331,7 +332,7 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		//	g_pBoardRectPic = NULL;
 		//}
 
-		//if ( g_pQcnWnd &&  g_pQcnWnd->GetHwnd() ) 
+		//if ( g_pQcnWnd &&  g_pQcnWnd->GetHandle() ) 
 		//{
 		//	vk = (int) wParam;
 
@@ -376,24 +377,16 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		//}
 		break;
 
-	//case WM_TIMER:
-	//	switch( wParam )
-	//	{
-	//	case 1:
-	//		if( g_pQcnWnd )
-	//		{
-	//			if (g_pQcnWnd->GetHwnd() )
-	//			{
-	//				SetWindowText(g_hWndMain, _T("Helping"));
-	//			} 
-	//			else
-	//			{
-	//				SetWindowText(g_hWndMain, _T("Searching"));
-	//			}
-	//		}
-	//		return 0;
-	//	}
-	//	break;
+	case WM_TIMER:
+		switch( wParam )
+		{
+		case APPUPDATE_TIMER:
+			if (!AppLoop()) {
+			    DestroyWindow(g_hWndMain);
+			}
+			return 0;
+		}
+		break;
 	case WM_DESTROY:
 		if(g_bInitialized)
 		{

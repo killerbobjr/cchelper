@@ -1,5 +1,7 @@
 #pragma once
 
+#include "IGameWindow.h"
+
 enum QncDlgItemEnum
 {
 	QNC_START_BTN	=	0,
@@ -11,6 +13,7 @@ enum QncDlgItemEnum
 	QNC_ITEMSIZE		
 };
 
+
 struct QncDlgItemInfo
 {
 	INT			nID;
@@ -19,7 +22,7 @@ struct QncDlgItemInfo
 };
 
 
-class CQQNewChessWnd
+class CQQNewChessWnd : public IGameWindow
 {
 	static QncDlgItemInfo QncItemsInfo[QNC_ITEMSIZE];
 
@@ -45,7 +48,13 @@ public:
 	COLORREF * CQQNewChessWnd::GetRectData(int x, int y);
 	bool Attach(HWND hwnd);
 
-	HWND GetHwnd(void)
+	int		GetTurn();
+	char	GetPiece( int x, int y) ;
+
+
+	void DumpBoradHash();
+
+	virtual HWND GetHandle(void)
 	{ 
 		if ( m_hwndMain && IsWindow(m_hwndMain) )
 		{
@@ -70,8 +79,10 @@ public:
 	}
 
 	HWND FindQQNewChessWindow();
-	
-	DWORD CQQNewChessWnd::GetHash( int x, int y );
+
+	DWORD CQQNewChessWnd::GetHashValue( int x, int y, int len );
+
+	virtual DWORD GetHashValue( int x, int y );
 
 	friend BOOL CALLBACK QQNewChessWnd_EnumChildProc( HWND hwnd,  LPARAM lParam);
 

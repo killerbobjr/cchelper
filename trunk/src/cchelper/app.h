@@ -1,26 +1,11 @@
 #pragma once
 
+#include "IGameWindow.h"
 
 // DEFINES
 //___________________________________________________________________________
 
 #define MEDIAFILE(f)	_T("../../media/"##f)
-
-#define PIECEHV_RJ	(0xD2FC85BF)
-#define PIECEHV_RM	(0x17B56D39)
-#define PIECEHV_RX	(0xC4F9C567)
-#define PIECEHV_RS	(0x826AA68B)
-#define PIECEHV_RK	(0x18233962)
-#define PIECEHV_RP	(0x402355D8)
-#define PIECEHV_RB	(0x03A331A5)
-
-#define PIECEHV_BJ	(0x56FC44E8)
-#define PIECEHV_BM	(0x5699E66C)
-#define PIECEHV_BX	(0x7AA76288)
-#define PIECEHV_BS	(0x2BC9BFCC)
-#define PIECEHV_BK	(0x651E8CBB)
-#define PIECEHV_BP	(0x737E5B02)
-#define PIECEHV_BB	(0x9291F591)
 
 #define PIECE_W		(18)
 #define PIECE_H		(18)
@@ -32,6 +17,7 @@
 
 #define MAX_LOADSTRING	256
 
+#define THROW_CHECK(hr,s) if (hr != S_OK) throw(s);
 
 // STRUCTS
 //___________________________________________________________________________
@@ -39,9 +25,30 @@
 struct PieceStruct
 {
 	char		cPiece;
-	DWORD		dwPieceHashValue;
+	//DWORD		dwPieceHashValue;
 	TCHAR		* szPieceFile;
 	CFastDIB	* pDib;
+};
+
+class CChessBoard
+{
+	static CFastDIB		*m_pBoardDIB;
+	static PieceStruct	m_tPieceStructs[PIECE_NUM];
+
+public:
+	static BOOL LoadMedia();
+	static void ReleaseMedia();
+
+private:
+	void DrawPiece( PieceStruct& ps, int x , int y );
+
+public:
+	CChessBoard();
+	~CChessBoard();
+	
+	void DrawBoard(const char * fen);
+	void DrawBoard( IGameWindow * pgw );
+	void DrawPiece(char piece, int x, int y);
 };
 
 // DECLARATIONS OF FUNCTIONS

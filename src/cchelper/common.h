@@ -18,7 +18,7 @@
 
 #define MAX_LOADSTRING			256
 #define APPUPDATE_TIMER			1
-#define APPUPDATE_TIME_ELAPSE	500
+#define APPUPDATE_TIME_ELAPSE	250
 // Global variables
 //___________________________________________________________________________
 

@@ -33,6 +33,7 @@ struct PieceStruct
 class CChessBoard
 {
 	static CFastDIB		*m_pBoardDIB;
+	static CFastDIB		*m_pMoveRectDIB;
 	static PieceStruct	m_tPieceStructs[PIECE_NUM];
 
 public:
@@ -40,13 +41,23 @@ public:
 	static void ReleaseMedia();
 
 private:
+
+	char m_fen[256];
+
+private:
 	void DrawPiece( PieceStruct& ps, int x , int y );
 
 public:
 	CChessBoard();
 	~CChessBoard();
+
+	const char * CatureToFen(IGameWindow * pgw);
+
+	const char * GetFen() { return m_fen; }
 	
-	void DrawBoard(const char * fen);
+	void ShowBestMove(int fx, int fy, int tx, int ty);
+
+	void DrawBoard(GAMEINFO * gi);
 	void DrawBoard( IGameWindow * pgw );
 	void DrawPiece(char piece, int x, int y);
 };

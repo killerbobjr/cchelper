@@ -34,12 +34,24 @@ class CQQNewChessWnd : public IGameWindow
 
 	HWND m_hwndBoard;
 
+	int	m_PlayerTurn;
+
+	char m_fen[256];
+
 public:
 	 int ox ;
 	 int oy ;
 
 	 int dx ; 
 	 int dy ;
+
+private:
+
+	bool ReadTurn(GAMEINFO * pgi);
+	bool ReadFen(GAMEINFO * pgi);
+
+	virtual char	GetPiece( int x, int y) ;
+	virtual DWORD GetHashValue( int x, int y );
 
 public:
 	CQQNewChessWnd(void);
@@ -48,11 +60,10 @@ public:
 	COLORREF * CQQNewChessWnd::GetRectData(int x, int y);
 	bool Attach(HWND hwnd);
 
-	int		GetTurn();
-	char	GetPiece( int x, int y) ;
-
 
 	void DumpBoradHash();
+
+	virtual bool ReadWindow(GAMEINFO * pgi) ;
 
 	virtual HWND GetHandle(void)
 	{ 
@@ -64,25 +75,10 @@ public:
 		return NULL; 
 	}
 
-	void Test()
-	{
-		if ( this->m_hwndItems[0] )
-		{
-			MoveWindow(this->m_hwndItems[0] ,
-				100,
-				100,
-				100,
-				100,
-				TRUE
-			);
-		}
-	}
 
 	HWND FindQQNewChessWindow();
-
 	DWORD CQQNewChessWnd::GetHashValue( int x, int y, int len );
 
-	virtual DWORD GetHashValue( int x, int y );
 
 	friend BOOL CALLBACK QQNewChessWnd_EnumChildProc( HWND hwnd,  LPARAM lParam);
 

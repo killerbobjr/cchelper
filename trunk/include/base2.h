@@ -26,7 +26,7 @@ inline bool AbsolutePath(const char *sz) {
 }
 
 inline void GetSelfExe(char *szDst) {
-  GetModuleFileName(NULL, szDst, PATH_MAX_CHAR);
+  GetModuleFileNameA(NULL, szDst, PATH_MAX_CHAR);
 }
 
 inline void StartThread(void *ThreadEntry(void *), void *lpParameter) {

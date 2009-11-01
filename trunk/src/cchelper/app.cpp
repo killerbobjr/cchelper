@@ -3,10 +3,12 @@
 #include "app.h"
 #include "IGameWindow.h"
 #include "QQNewChessWnd.h"
+#include "ChessEngine.h"
 
 using namespace base;
 
-CQQNewChessWnd * g_pQcnWnd = NULL;
+CQQNewChessWnd	* g_pQcnWnd = NULL;
+CChessEngine	* g_pChessEngine = NULL;
 
 // GLOBAL VALUES
 //___________________________________________________________________________
@@ -14,6 +16,8 @@ CQQNewChessWnd * g_pQcnWnd = NULL;
 // CChessBoard
 //___________________________________________________________________________
 CFastDIB * CChessBoard::m_pBoardDIB = NULL;
+CFastDIB * CChessBoard::m_pMoveRectDIB = NULL;
+
 //PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
 //	{ 'J', PIECEHV_RJ, MEDIAFILE(_T("CRJ.BMP")), 0 },
 //	{ 'M', PIECEHV_RM, MEDIAFILE(_T("CRM.BMP")), 0 },
@@ -84,6 +88,16 @@ BOOL CChessBoard::LoadMedia()
 				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
 			}
 		}
+
+		if( !m_pMoveRectDIB )
+		{
+			m_pMoveRectDIB = new CFastDIB();
+			if( m_pMoveRectDIB )
+			{
+				hr = m_pMoveRectDIB->LoadFromFile(MEDIAFILE(_T("MOVERECT.BMP")));
+				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));				
+			}
+		}
 	}
 	catch(const char * e)
 	{
@@ -113,6 +127,12 @@ void CChessBoard::ReleaseMedia()
 		m_pBoardDIB = NULL;
 	}
 
+	if( m_pMoveRectDIB )
+	{
+		delete m_pMoveRectDIB;
+		m_pMoveRectDIB = NULL;
+	}
+
 }
 
 void CChessBoard::DrawPiece( PieceStruct& ps, int x , int y )
@@ -131,12 +151,21 @@ void CChessBoard::DrawPiece(char piece, int x, int y)
 	}
 }
 
-void CChessBoard::DrawBoard(const char * lpFen)
+void CChessBoard::ShowBestMove(int fx, int fy, int tx, int ty)
 {
+	m_pMoveRectDIB->Draw( g_pMainSurface, 0, fx * PIECE_DW, fy * PIECE_DH);
+	m_pMoveRectDIB->Draw( g_pMainSurface, 0, tx * PIECE_DW, ty * PIECE_DH);
+}
+
+
+void CChessBoard::DrawBoard(GAMEINFO * gi)
+{
+	assert(gi);
+
+	char *lpFen = gi->szFen ;
 	int x = 0;
 	int y = 0;
 	char c;
-
 
 	if ( g_pMainSurface )
 	{		
@@ -152,7 +181,10 @@ void CChessBoard::DrawBoard(const char * lpFen)
 			}
 			else if( c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') 
 			{
-				DrawPiece( c , x, y );
+				if( gi->PlayerColor == TURN_WHITE )
+					DrawPiece( c , x, y );
+				else if( gi->PlayerColor == TURN_BLACK)
+					DrawPiece( c, x, 9 - y);
 				x = x + 1;
 			}else if( c == '/' )
 			{
@@ -162,12 +194,10 @@ void CChessBoard::DrawBoard(const char * lpFen)
 
 			c= *(++lpFen);
 		}
-	}
-
-	
+	}	
 }
 
-
+/*
 void CChessBoard::DrawBoard( IGameWindow * pgw )
 {
 	assert(pgw && g_pMainSurface && m_pBoardDIB);
@@ -202,6 +232,7 @@ void CChessBoard::DrawBoard( IGameWindow * pgw )
 		this->DrawPiece( 'K' , 9, 1 );
 	}
 }
+*/
 
 CChessBoard * g_pBoard = NULL;
 
@@ -216,11 +247,21 @@ BOOL InitApp()
 
 	g_pBoard = new CChessBoard();
 
+	g_pChessEngine = new CChessEngine();
+
+	g_pChessEngine->InitEngine("cce.exe");
+
+	assert(g_pChessEngine->IsLoaded() );
 	return TRUE;
 }
 
 BOOL AppLoop()
 {
+	static char fenCopy[256];
+
+	char szCmd[1024];
+	static int lastturn=0;
+
 	HWND hwnd = g_pQcnWnd->GetHandle();
 	if( !hwnd )
 	{
@@ -228,12 +269,57 @@ BOOL AppLoop()
 	} 
 	else
 	{
+		GAMEINFO gi;
 		WINDOWPLACEMENT wp;
 		GetWindowPlacement(hwnd,&wp);
 
-		if (wp.showCmd == SW_SHOWNORMAL){
-			g_pBoard->DrawBoard( g_pQcnWnd );
-			
+		if (wp.showCmd == SW_SHOWNORMAL)
+		{
+			if( g_pQcnWnd->ReadWindow(&gi) )
+			{
+				g_pBoard->DrawBoard( &gi );
+				if(strcmp(fenCopy, gi.szFen ) != 0 && lastturn != gi.Turn )
+				{
+					strcpy_s(fenCopy, 256, gi.szFen);
+					lastturn = gi.Turn ;
+
+					if( gi.PlayerColor == gi.Turn  )
+					{
+						if( g_pChessEngine->IsLoaded() )
+						{
+							if( g_pChessEngine->GetState() == CChessEngine::BusyWait  )
+							{
+								g_pChessEngine->SendCommand("stop");
+								Sleep(20);
+							}
+							sprintf(szCmd, "position fen %s", gi.szFen );
+							g_pChessEngine->SendCommand(szCmd);
+							Sleep(20);
+							g_pChessEngine->SendCommand("go time 3000" );
+						}
+					}
+				}else 
+				{
+					if( gi.Turn == gi.PlayerColor && g_pChessEngine )
+					{
+						CChessEngine::PieceMove * mv;
+						mv = g_pChessEngine->GetBestMove();
+						if ( mv )
+						{
+							if ( gi.PlayerColor == TURN_WHITE )
+								g_pBoard->ShowBestMove(mv->fx, mv->fy, mv->tx, mv->ty);
+							else if (gi.PlayerColor == TURN_BLACK)
+								g_pBoard->ShowBestMove(mv->fx, 9 - mv->fy, mv->tx, 9 - mv->ty);
+
+						}
+					}
+				}
+			} 
+
+			if( g_pChessEngine)
+			{
+				g_pChessEngine->UpdateState();
+			}
 		}
 	}
 	//g_pBoard->DrawBoard("jmxsksxmj/9/1p5p1/b1b1b1b1b/9/9/B1B1B1B1B/1P5P1/9/JMXSKSXMJ w");
@@ -247,6 +333,8 @@ BOOL ExitApp()
 	if( g_pBoard ) delete g_pBoard;
 
 	if ( g_pQcnWnd ) delete g_pQcnWnd;
+
+	if ( g_pChessEngine) delete g_pChessEngine;
 
 	CChessBoard::ReleaseMedia();
 

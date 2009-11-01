@@ -118,10 +118,10 @@ BOOL doInit(HINSTANCE hInstance, int nCmdShow)
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CCHELPER));
 
-	SetWindowSize(230, 235);
-	//SetWindowSize(210, 235);
+	//SetWindowSize(230, 235);
+	SetWindowSize(210, 235);
 
-	//SetTimer( g_hWndMain, APPUPDATE_TIMER, APPUPDATE_TIME_ELAPSE, 0 );
+	SetTimer( g_hWndMain, APPUPDATE_TIMER, APPUPDATE_TIME_ELAPSE, 0 );
 
 	if(!InitApp())
 		return FALSE;
@@ -197,11 +197,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
             DispatchMessage(&msg);
         }else
 		{
-			if( !AppLoop() )
-				DestroyWindow(g_hWndMain);
-			else
-				doUpdate();
-			//WaitMessage();
+			//if( !AppLoop() )
+			//	DestroyWindow(g_hWndMain);
+			//else
+			doUpdate();
+//			WaitMessage();
 		}
 
     }

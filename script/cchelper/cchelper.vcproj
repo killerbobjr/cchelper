@@ -178,6 +178,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\base\appenv.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\cchelper\ChessBoard.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\cchelper\ChessEngine.cpp"
 				>
 			</File>
@@ -209,6 +217,10 @@
 			>
 			<File
 				RelativePath="..\..\src\cchelper\app.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\appenv.h"
 				>
 			</File>
 			<File

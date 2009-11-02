@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "log.h"
 #include "fastdib.h"
 // DEFINES
 //___________________________________________________________________________
@@ -31,7 +32,3 @@ extern CFastDIB		*g_pMainSurface;
 
 // FUNCTIONS
 //___________________________________________________________________________
-namespace base
-{
-	void Log(int nBugFileID,const char * format,...);
-}

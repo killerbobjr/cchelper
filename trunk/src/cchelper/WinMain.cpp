@@ -104,7 +104,7 @@ BOOL doInit(HINSTANCE hInstance, int nCmdShow)
     g_hWndMain = CreateWindowEx(WS_EX_TOPMOST,
                           szWindowClass,
                           szTitle,
-                          WS_OVERLAPPEDWINDOW,
+                          WS_CAPTION|WS_SYSMENU,
                           0,
                           0,
                           CW_USEDEFAULT,

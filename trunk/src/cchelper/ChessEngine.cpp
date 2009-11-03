@@ -47,7 +47,7 @@ void CChessEngine::SendCommand(const char * cmd)
 {
 	if( m_pPipe )
 	{
-		if( strncmp(cmd, "go ", 3) == 0 )
+		if( strncmp(cmd, "go", 2) == 0 )
 		{
 			this->m_bHasBestMove = false;
 			this->m_state = CChessEngine::BusyWait ;

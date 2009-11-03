@@ -30,6 +30,9 @@ CFastDIB * CChessBoard::m_pMoveRectDIB = NULL;
 //	{ 'b', PIECEHV_BB, MEDIAFILE(_T("CBB.BMP")), 0 },
 //};
 
+#ifdef ENGINE_CCE
+
+
 PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
 	{ 'J',  _T("CRJ.BMP"), 0 },
 	{ 'M',  _T("CRM.BMP"), 0 },
@@ -47,6 +50,27 @@ PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
 	{ 'b',  _T("CBB.BMP"), 0 },
 };
 
+
+#else
+
+PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
+	{ 'R',  _T("CRJ.BMP"), 0 },
+	{ 'N',  _T("CRM.BMP"), 0 },
+	{ 'B',  _T("CRX.BMP"), 0 },
+	{ 'A',  _T("CRS.BMP"), 0 },
+	{ 'K',  _T("CRK.BMP"), 0 },
+	{ 'C',  _T("CRP.BMP"), 0 },
+	{ 'P',  _T("CRB.BMP"), 0 },
+	{ 'r',  _T("CBJ.BMP"), 0 },
+	{ 'n',  _T("CBM.BMP"), 0 },
+	{ 'b',  _T("CBX.BMP"), 0 },
+	{ 'a',  _T("CBS.BMP"), 0 },
+	{ 'k',  _T("CBK.BMP"), 0 },
+	{ 'c',  _T("CBP.BMP"), 0 },
+	{ 'p',  _T("CBB.BMP"), 0 },
+};
+
+#endif
 CChessBoard::CChessBoard()
 {
 }

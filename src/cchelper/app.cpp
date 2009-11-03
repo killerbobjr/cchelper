@@ -33,8 +33,11 @@ BOOL InitApp()
 
 	g_pChessEngine = new CChessEngine();
 
+#ifdef ENGINE_CCE
 	g_pChessEngine->InitEngine("cce.exe");
-
+#else
+	g_pChessEngine->InitEngine("eleeye.exe");
+#endif
 	assert(g_pChessEngine->IsLoaded() );
 	return TRUE;
 }
@@ -71,15 +74,14 @@ BOOL AppLoop()
 					{
 						if( g_pChessEngine->IsLoaded() )
 						{
-							if( g_pChessEngine->GetState() == CChessEngine::BusyWait  )
+							if( g_pChessEngine->GetState() == CChessEngine::BusyWait)
 							{
 								g_pChessEngine->SendCommand("stop");
-								Sleep(20);
 							}
 							sprintf(szCmd, "position fen %s", gi.szFen );
 							g_pChessEngine->SendCommand(szCmd);
 							Sleep(20);
-							g_pChessEngine->SendCommand("go time 3000" );
+							g_pChessEngine->SendCommand("go time 10000" );
 						}
 					}
 				}else 
@@ -107,17 +109,17 @@ BOOL AppLoop()
 		}
 	}
 
-	if(1) // test ocde
-	{
-		GAMEINFO tgi;
-		tgi.PlayerColor = TURN_WHITE;
-		strcpy(tgi.szFen, "jmxsksxmj/9/1p5p1/b1b1b1b1b/9/9/B1B1B1B1B/1P5P1/9/JMXSKSXMJ w");
-		tgi.Turn = TURN_WHITE;
+	//if(1) // test ocde
+	//{
+	//	GAMEINFO tgi;
+	//	tgi.PlayerColor = TURN_WHITE;
+	//	strcpy(tgi.szFen, "jmxsksxmj/9/1p5p1/b1b1b1b1b/9/9/B1B1B1B1B/1P5P1/9/JMXSKSXMJ w");
+	//	tgi.Turn = TURN_WHITE;
 
-		g_pBoard->DrawBoard(&tgi);
-		g_pBoard->ShowBestMove(0,0,2,2);
-	}
-	
+	//	g_pBoard->DrawBoard(&tgi);
+	//	g_pBoard->ShowBestMove(0,0,2,2);
+	//}
+	//
 	//InvalidateRect(g_hWndMain,NULL,FALSE);
 	return TRUE;
 }

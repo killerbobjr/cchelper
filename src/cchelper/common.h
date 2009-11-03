@@ -12,8 +12,11 @@
 #include <stdio.h>
 #include <assert.h>
 
+//#define ENGINE_CCE
+
 #include "log.h"
 #include "fastdib.h"
+#include "ChessEngine.h"
 // DEFINES
 //___________________________________________________________________________
 
@@ -29,6 +32,6 @@ extern BOOL			g_bActive;
 extern HWND			g_hWndMain;
 extern BOOL			g_bInitialized;
 extern CFastDIB		*g_pMainSurface;
-
+extern CChessEngine	* g_pChessEngine;
 // FUNCTIONS
 //___________________________________________________________________________

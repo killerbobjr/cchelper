@@ -3,6 +3,7 @@
 #include "common.h"
 #include "Resource.h"
 #include "QQNewChessWnd.h"
+#include "ChessEngine.h"
 #include "fastdib.h"
 #include "app.h"
 
@@ -200,8 +201,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			//if( !AppLoop() )
 			//	DestroyWindow(g_hWndMain);
 			//else
-			doUpdate();
-//			WaitMessage();
+			WaitMessage();
 		}
 
     }
@@ -325,58 +325,21 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 
 		EndPaint(g_hWndMain, &ps);
 		break;
-	case WM_KEYUP:
-		//if ( g_pBoardRectPic )
-		//{
-		//	delete g_pBoardRectPic ;
-		//	g_pBoardRectPic = NULL;
-		//}
+	//case WM_KEYUP:
+	//		vk = (int) wParam;
 
-		//if ( g_pQcnWnd &&  g_pQcnWnd->GetHandle() ) 
-		//{
-		//	vk = (int) wParam;
-
-		//	switch( vk )
-		//	{
-		//	case VK_F2:
-		//		g_pQcnWnd->dx --;
-		//		break;
-		//	case VK_F3:
-		//		g_pQcnWnd->dx ++;
-		//		break;
-
-		//	case VK_F4:
-		//		g_pQcnWnd->dy --;
-		//		break;
-		//	case VK_F5:
-		//		g_pQcnWnd->dy ++;
-		//		break;
-
-		//	case  VK_LEFT:
-		//		g_pQcnWnd->ox --;
-		//		break;
-		//	case VK_RIGHT:
-		//		g_pQcnWnd->ox ++;
-		//		break;
-		//	case VK_UP:
-		//		g_pQcnWnd->oy --;
-		//		break;
-		//	case VK_DOWN:
-		//		g_pQcnWnd->oy ++;
-		//		break;
-		//	case VK_SPACE:
-		//		g_x =(int)( (double)rand() / (RAND_MAX + 1) * 9 );
-		//		g_y =(int)( (double)rand() / (RAND_MAX + 1) * 10 );
-		//		break;
-		//	case VK_RETURN:
-		//		DumpBoradHash();
-		//		break;
-		//	}
-		//	g_pBoardRectPic = g_pQcnWnd->GetRectData( g_x, g_y) ;
-		//	InvalidateRect(g_hWndMain,NULL,FALSE);
-		//}
+	//		switch( vk )
+	//		{
+	//		case VK_RETURN:
+	//			if ( g_pChessEngine)
+	//			{
+	//				if ( g_pChessEngine->GetState() == CChessEngine::BusyWait )
+	//					g_pChessEngine->SendCommand("stop");
+	//			}
+	//			//DumpBoradHash();
+	//			break;
+	//		}
 		break;
-
 	case WM_TIMER:
 		switch( wParam )
 		{
@@ -384,6 +347,8 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 			if (!AppLoop()) {
 			    DestroyWindow(g_hWndMain);
 			}
+			doUpdate();
+
 			return 0;
 		}
 		break;

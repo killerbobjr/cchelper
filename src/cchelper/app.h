@@ -58,7 +58,6 @@ public:
 	void ShowBestMove(int fx, int fy, int tx, int ty);
 
 	void DrawBoard(GAMEINFO * gi);
-	void DrawBoard( IGameWindow * pgw );
 	void DrawPiece(char piece, int x, int y);
 };
 

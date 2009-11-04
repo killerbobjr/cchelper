@@ -5,6 +5,7 @@
 #include "QQNewChessWnd.h"
 #include "ChessEngine.h"
 #include "AppEnv.h"
+#include "resource.h"
 
 using namespace base;
 
@@ -22,6 +23,10 @@ BOOL InitApp()
 	if(!AppEnv::LoadEnv(_T("./cchelper.ini")))
 		return FALSE;
 
+	if(AppEnv::nThinkTime == 10)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_CHECKED);
+	else if(AppEnv::nThinkTime == 30)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_CHECKED);
+	else if(AppEnv::nThinkTime == 90)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_CHECKED);
+
 	if( !CChessBoard::LoadMedia() )
 	{
 		return FALSE;
@@ -36,7 +41,7 @@ BOOL InitApp()
 #ifdef ENGINE_CCE
 	g_pChessEngine->InitEngine("cce.exe");
 #else
-	g_pChessEngine->InitEngine("eleeye.exe");
+	g_pChessEngine->InitEngine(AppEnv::szEngine);
 #endif
 	assert(g_pChessEngine->IsLoaded() );
 	return TRUE;
@@ -53,6 +58,7 @@ BOOL AppLoop()
 	if( !hwnd )
 	{
 		g_pQcnWnd->FindQQNewChessWindow();
+		g_pBoard->DrawBoard( NULL );
 	} 
 	else
 	{
@@ -62,6 +68,7 @@ BOOL AppLoop()
 
 		if (wp.showCmd == SW_SHOWNORMAL)
 		{
+			memset( &gi, 0, sizeof(gi));
 			if( g_pQcnWnd->ReadWindow(&gi) )
 			{
 				g_pBoard->DrawBoard( &gi );
@@ -76,12 +83,12 @@ BOOL AppLoop()
 						{
 							if( g_pChessEngine->GetState() == CChessEngine::BusyWait)
 							{
-								g_pChessEngine->SendCommand("stop");
+								g_pChessEngine->Stop();
 							}
 							sprintf(szCmd, "position fen %s", gi.szFen );
 							g_pChessEngine->SendCommand(szCmd);
-							Sleep(20);
-							g_pChessEngine->SendCommand("go time 10000" );
+							sprintf(szCmd, "go time %d", AppEnv::nThinkTime );
+							g_pChessEngine->SendCommand(szCmd);
 						}
 					}
 				}else 
@@ -108,7 +115,6 @@ BOOL AppLoop()
 			}
 		}
 	}
-
 	//if(1) // test ocde
 	//{
 	//	GAMEINFO tgi;

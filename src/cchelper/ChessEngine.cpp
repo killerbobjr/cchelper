@@ -42,6 +42,33 @@ void CChessEngine::UpdateState()
 	}
 }
 
+void CChessEngine::Restart()
+{
+	if( !IsLoaded() )
+		return;
+
+	if ( this->GetState() == CChessEngine::BusyWait )
+	{
+		this->Stop();
+	}
+
+	this->m_bHasBestMove = false;
+}
+
+void CChessEngine::Stop()
+{
+	if ( m_pPipe )
+	{
+		SendCommand("stop");
+		while(m_pPipe->LineInput(m_szInputBuf))
+		{
+			if( strncmp(m_szInputBuf, "bestmove ", 9) == 0 )
+				break;
+		}
+		this->m_state = CChessEngine::Idle ;
+		this->m_bHasBestMove = false;
+	}
+}
 
 void CChessEngine::SendCommand(const char * cmd)
 {
@@ -95,6 +122,8 @@ bool CChessEngine::InitEngine(const char * szEngineFile)
 			}
 		}
 	}
+
+	m_pPipe->LineOutput("setoption usemillisec false");
 
 	return m_bLoaded;
 }

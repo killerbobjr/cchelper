@@ -180,43 +180,46 @@ void CChessBoard::ShowBestMove(int fx, int fy, int tx, int ty)
 }
 
 
+
 void CChessBoard::DrawBoard(GAMEINFO * gi)
 {
-	assert(gi);
+	assert( g_pMainSurface && m_pBoardDIB )	;
+
+	if ( gi == NULL )
+	{
+		m_pBoardDIB->Draw( g_pMainSurface );
+		return;
+	}
 
 	char *lpFen = gi->szFen ;
 	int x = 0;
 	int y = 0;
 	char c;
 
-	if ( g_pMainSurface )
-	{		
-		m_pBoardDIB->Draw( g_pMainSurface );
+	c = *lpFen;
 
-		c = *lpFen;
-
-		while( c && c != ' ')
+	m_pBoardDIB->Draw( g_pMainSurface );
+	while( c && c != ' ')
+	{
+		if( c >= '0' && c <= '9' )
 		{
-			if( c >= '0' && c <= '9' )
-			{
-				x = x + c - '0';
-			}
-			else if( c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') 
-			{
-				if( gi->PlayerColor == TURN_WHITE )
-					DrawPiece( c , x, y );
-				else if( gi->PlayerColor == TURN_BLACK)
-					DrawPiece( c, x, 9 - y);
-				x = x + 1;
-			}else if( c == '/' )
-			{
-				x = 0;
-				y ++;
-			}
-
-			c= *(++lpFen);
+			x = x + c - '0';
 		}
-	}	
+		else if( c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') 
+		{
+			if( gi->PlayerColor == TURN_WHITE )
+				DrawPiece( c , x, y );
+			else if( gi->PlayerColor == TURN_BLACK)
+				DrawPiece( c, x, 9 - y);
+			x = x + 1;
+		}else if( c == '/' )
+		{
+			x = 0;
+			y ++;
+		}
+
+		c= *(++lpFen);
+	}
 }
 
 

@@ -41,7 +41,11 @@ BOOL InitApp()
 #ifdef ENGINE_CCE
 	g_pChessEngine->InitEngine("cce.exe");
 #else
-	g_pChessEngine->InitEngine(AppEnv::szEngine);
+	if(g_pChessEngine->InitEngine(AppEnv::szEngine))
+	{
+		base::Log(0,"Load engine success");
+	}
+	else return false;
 #endif
 	assert(g_pChessEngine->IsLoaded() );
 	return TRUE;

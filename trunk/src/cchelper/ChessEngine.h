@@ -48,7 +48,7 @@ public:
 	void SendCommand(const char * cmd);
 
 	bool IsLoaded(){ return m_bLoaded;}
-	bool InitEngine(const char * szEngineFile);
+	bool InitEngine(TCHAR * szEngineFile);
 
 	virtual void Restart();
 };

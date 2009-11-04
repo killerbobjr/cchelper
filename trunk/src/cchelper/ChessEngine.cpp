@@ -85,7 +85,7 @@ void CChessEngine::SendCommand(const char * cmd)
 	}
 }
 
-bool CChessEngine::InitEngine(const char * szEngineFile)
+bool CChessEngine::InitEngine(TCHAR * szEngineFile)
 {
 	if( !m_pPipe )
 		m_pPipe = new PipeStruct();

@@ -9,10 +9,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "evaluate_default", "script\evaluate_default\evaluate_default.vcproj", "{2AC2460B-7756-404D-A5D7-77CF14BF126B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cchelper", "script\cchelper\cchelper.vcproj", "{34D5AFA8-E9DE-4679-898E-3944D1B1392C}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2AC2460B-7756-404D-A5D7-77CF14BF126B} = {2AC2460B-7756-404D-A5D7-77CF14BF126B}
-		{5784B7CB-4265-435B-9BB4-CB2E93AD36DD} = {5784B7CB-4265-435B-9BB4-CB2E93AD36DD}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -6,6 +6,7 @@
 #include "ChessEngine.h"
 #include "fastdib.h"
 #include "app.h"
+#include "appenv.h"
 
 
 // STRUCTS
@@ -309,6 +310,24 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 			break;
 		case IDM_EXIT:
 			DestroyWindow(g_hWndMain);
+			break;
+		case IDM_SEC10:
+			AppEnv::nThinkTime = 10;			
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_CHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_UNCHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_UNCHECKED);
+			break;
+		case IDM_SEC30:
+			AppEnv::nThinkTime = 30;
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_CHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_UNCHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_UNCHECKED);
+			break;
+		case IDM_SEC90:
+			AppEnv::nThinkTime = 90;
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_CHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_UNCHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_UNCHECKED);
 			break;
 		default:
 			return DefWindowProc(g_hWndMain, message, wParam, lParam);

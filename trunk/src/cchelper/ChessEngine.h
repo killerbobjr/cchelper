@@ -1,11 +1,13 @@
 #pragma once
 
+
+#include "IChessEngine.h"
+
 #define INPUT_BUFFER_SIZE		(4096)
 struct PipeStruct;
 
-
-
 class CChessEngine
+	:public IChessEngine
 {
 public:
 	struct PieceMove
@@ -41,9 +43,12 @@ public:
 	PieceMove * GetBestMove() { if ( m_bHasBestMove ) return &m_mvBestMove ; else return NULL ; };
 
 	void UpdateState();
+	void Stop();
 	
 	void SendCommand(const char * cmd);
 
 	bool IsLoaded(){ return m_bLoaded;}
 	bool InitEngine(const char * szEngineFile);
+
+	virtual void Restart();
 };

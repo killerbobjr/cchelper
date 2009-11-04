@@ -22,6 +22,13 @@ BEGIN
     BEGIN
         MENUITEM "E&xit",                IDM_EXIT
     END
+    POPUP "&Play"
+    BEGIN
+		MENUITEM "&Restart"				  IDM_RESTART
+        MENUITEM "10 sec",                IDM_SEC10
+        MENUITEM "30 sec",                IDM_SEC30
+        MENUITEM "90 sec",                IDM_SEC90
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About ...",           IDM_ABOUT

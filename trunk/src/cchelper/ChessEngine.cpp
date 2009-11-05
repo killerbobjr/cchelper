@@ -1,12 +1,14 @@
 #include "common.h"
 #include "ChessEngine.h"
 #include "pipe.h"
+#include "appenv.h"
 #include <time.h>
 
 CChessEngine::CChessEngine(void)
 {
 	m_pPipe = NULL;
 	m_bLoaded = false;
+	m_nSkipBestMoveCount = 0;
 }
 
 
@@ -30,16 +32,43 @@ void CChessEngine::UpdateState()
 		{
 			if( strncmp(m_szInputBuf, "bestmove ", 9) == 0 )
 			{
-				base::Log(2,m_szInputBuf);
-				this->m_state = CChessEngine::Idle ;
-				this->m_bHasBestMove = true;
-				this->m_mvBestMove.fx = m_szInputBuf[9] - 'a';
-				this->m_mvBestMove.fy = 9 - (m_szInputBuf[10] - '0');
-				this->m_mvBestMove.tx = m_szInputBuf[11] - 'a';
-				this->m_mvBestMove.ty = 9 - (m_szInputBuf[12] - '0');
+				if ( m_nSkipBestMoveCount > 0 )
+				{
+					base::Log(2,"%s skip",m_szInputBuf);
+					m_nSkipBestMoveCount --;
+				}
+				else
+				{
+					base::Log(2,m_szInputBuf);
+					this->m_state = CChessEngine::Idle ;
+					this->m_bHasBestMove = true;
+					this->m_mvBestMove.fx = m_szInputBuf[9] - 'a';
+					this->m_mvBestMove.fy = 9 - (m_szInputBuf[10] - '0');
+					this->m_mvBestMove.tx = m_szInputBuf[11] - 'a';
+					this->m_mvBestMove.ty = 9 - (m_szInputBuf[12] - '0');
+					if( this->m_pGameWindow && AppEnv::bAutoPlay )
+					{
+						this->m_pGameWindow->MovePiece(this->m_mvBestMove.fx, this->m_mvBestMove.fy,
+							this->m_mvBestMove.tx, this->m_mvBestMove.ty);
+					}
+				}
 			}
 		}
 	}
+}
+
+void CChessEngine::GameOver()
+{
+	if( !IsLoaded() )
+		return;
+
+	if ( this->GetState() == CChessEngine::BusyWait )
+	{
+		this->Stop();
+	}
+
+	this->m_bHasBestMove = false;
+	base::Log(0,"GameOver");
 }
 
 void CChessEngine::Restart()
@@ -53,6 +82,7 @@ void CChessEngine::Restart()
 	}
 
 	this->m_bHasBestMove = false;
+	base::Log(0,"Restart");
 }
 
 void CChessEngine::Stop()
@@ -60,11 +90,12 @@ void CChessEngine::Stop()
 	if ( m_pPipe )
 	{
 		SendCommand("stop");
-		while(m_pPipe->LineInput(m_szInputBuf))
+		
+		if( g_pChessEngine->GetState() == CChessEngine::BusyWait )
 		{
-			if( strncmp(m_szInputBuf, "bestmove ", 9) == 0 )
-				break;
+			this->m_nSkipBestMoveCount ++;
 		}
+		
 		this->m_state = CChessEngine::Idle ;
 		this->m_bHasBestMove = false;
 	}

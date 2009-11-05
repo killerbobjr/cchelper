@@ -329,6 +329,12 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_UNCHECKED);
 			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_UNCHECKED);
 			break;
+		case IDM_AUTOPLAY:
+			AppEnv::bAutoPlay = !AppEnv::bAutoPlay ;
+			if(AppEnv::bAutoPlay )
+				CheckMenuItem(GetMenu(g_hWndMain), IDM_AUTOPLAY, MF_CHECKED);
+			else
+				CheckMenuItem(GetMenu(g_hWndMain), IDM_AUTOPLAY, MF_UNCHECKED);			
 		default:
 			return DefWindowProc(g_hWndMain, message, wParam, lParam);
 		}

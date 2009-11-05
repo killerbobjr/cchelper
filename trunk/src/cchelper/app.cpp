@@ -38,6 +38,9 @@ BOOL InitApp()
 
 	g_pChessEngine = new CChessEngine();
 
+	g_pQcnWnd->SetChessEngine(g_pChessEngine);
+	g_pChessEngine->SetGameWindow(g_pQcnWnd);
+
 #ifdef ENGINE_CCE
 	g_pChessEngine->InitEngine("cce.exe");
 #else

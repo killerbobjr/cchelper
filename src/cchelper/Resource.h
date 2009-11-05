@@ -8,7 +8,7 @@
 
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
-#define IDM_RESTART		106
+#define IDM_AUTOPLAY		106
 #define IDM_SEC10		107
 #define IDM_SEC30		108
 #define IDM_SEC90		109

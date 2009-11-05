@@ -2,6 +2,7 @@
 
 #include "IGameWindow.h"
 
+
 enum QncDlgItemEnum
 {
 	QNC_START_BTN	=	0,
@@ -34,6 +35,8 @@ class CQQNewChessWnd : public IGameWindow
 
 	HWND m_hwndBoard;
 
+	bool m_bGameOver;
+
 	int	m_PlayerTurn;
 
 	char m_fen[256];
@@ -60,6 +63,7 @@ public:
 	COLORREF * CQQNewChessWnd::GetRectData(int x, int y);
 	bool Attach(HWND hwnd);
 
+	virtual void MovePiece(int fx, int fy, int tx, int ty );
 
 	void DumpBoradHash();
 

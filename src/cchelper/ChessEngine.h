@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "IGameWindow.h"
 #include "IChessEngine.h"
 
 #define INPUT_BUFFER_SIZE		(4096)
@@ -33,10 +33,18 @@ private:
 
 	bool m_bHasBestMove;
 	PieceMove m_mvBestMove;
+	int m_nSkipBestMoveCount;
+
+	IGameWindow * m_pGameWindow;
 
 public:
 	CChessEngine(void);
 	virtual ~CChessEngine(void);
+
+	void SetGameWindow(IGameWindow * pgw)
+	{
+		m_pGameWindow = pgw;
+	}
 
 	EngineState GetState() { return m_state; }
 
@@ -51,4 +59,5 @@ public:
 	bool InitEngine(TCHAR * szEngineFile);
 
 	virtual void Restart();
+	virtual void GameOver();
 };

@@ -175,11 +175,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\cchelper\app.cpp"
+				RelativePath="..\..\src\cchelper\App.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\base\appenv.cpp"
+				RelativePath="..\..\src\base\AppEnv.cpp"
 				>
 			</File>
 			<File
@@ -191,7 +191,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\fastdib\fastdib.cpp"
+				RelativePath="..\..\src\fastdib\FastDIB.cpp"
 				>
 			</File>
 			<File
@@ -217,11 +217,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\cchelper\app.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\appenv.h"
+				RelativePath="..\..\include\AppEnv.h"
 				>
 			</File>
 			<File
@@ -238,6 +234,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\IGameWindow.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\log.h"
 				>
 			</File>
 			<File

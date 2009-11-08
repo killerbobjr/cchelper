@@ -294,7 +294,6 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
-	int vk;
 
 	switch (message)
 	{
@@ -352,6 +351,8 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		}
 
 		EndPaint(g_hWndMain, &ps);
+		break;
+	case WM_LBUTTONUP:
 		break;
 	//case WM_KEYUP:
 	//		vk = (int) wParam;

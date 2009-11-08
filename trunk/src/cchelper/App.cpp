@@ -79,7 +79,7 @@ BOOL AppLoop()
 
 		GAMEINFO gi;
 		WINDOWPLACEMENT wp;
-		GetWindowPlacement(hwnd,&wp);
+		GetWindowPlacement(g_pQcnWnd->GetFrameWnd(),&wp);
 
 		if (wp.showCmd == SW_SHOWNORMAL)
 		{
@@ -132,6 +132,10 @@ BOOL AppLoop()
 				}
 			}
 
+		} 
+		else if ( wp.showCmd == SW_SHOWMINIMIZED )
+		{
+			g_pBoard->DrawBoard( NULL );
 		}
 	}
 

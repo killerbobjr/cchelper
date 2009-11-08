@@ -24,7 +24,7 @@ public:
 	virtual bool	ReadWindow(GAMEINFO * pgi) = 0;
 	virtual HWND	GetHandle()	= 0;
 
-	virtual void MovePiece(int fx, int fy, int tx, int ty ) = 0;
+	virtual BOOL MovePiece(int fx, int fy, int tx, int ty ) = 0;
 
 	void SetChessEngine(IChessEngine* pce)
 	{

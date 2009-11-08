@@ -26,12 +26,18 @@ CChessEngine::~CChessEngine(void)
 
 void CChessEngine::UpdateState()
 {
+	static char last_bestmove[100];
+
 	if ( m_pPipe )
 	{
 		if(m_pPipe->LineInput(m_szInputBuf))
 		{
 			if( strncmp(m_szInputBuf, "bestmove ", 9) == 0 )
 			{
+				if( strcmp(m_szInputBuf, last_bestmove) == 0 )
+				{
+					base::Log(2, "%s the same best move", m_szInputBuf);
+				}
 				if ( m_nSkipBestMoveCount > 0 )
 				{
 					base::Log(2,"%s skip",m_szInputBuf);
@@ -46,10 +52,12 @@ void CChessEngine::UpdateState()
 					this->m_mvBestMove.fy = 9 - (m_szInputBuf[10] - '0');
 					this->m_mvBestMove.tx = m_szInputBuf[11] - 'a';
 					this->m_mvBestMove.ty = 9 - (m_szInputBuf[12] - '0');
-					if( this->m_pGameWindow && AppEnv::bAutoPlay )
+					this->m_BestMoveTime = time(NULL);
+
+					if( AppEnv::bAutoPlay && m_pGameWindow )
 					{
-						this->m_pGameWindow->MovePiece(this->m_mvBestMove.fx, this->m_mvBestMove.fy,
-							this->m_mvBestMove.tx, this->m_mvBestMove.ty);
+						m_pGameWindow->MovePiece(m_mvBestMove.fx, m_mvBestMove.fy,
+							m_mvBestMove.tx, m_mvBestMove.ty);
 					}
 				}
 			}
@@ -113,6 +121,20 @@ void CChessEngine::SendCommand(const char * cmd)
 
 		m_pPipe->LineOutput(cmd);
 		base::Log(2,cmd);
+	}
+}
+
+time_t CChessEngine::GetBestMoveElapse()
+{
+	if( m_bHasBestMove )
+	{
+		time_t now;
+		now = time(NULL);
+		return( now - this->m_BestMoveTime );
+	} 
+	else
+	{
+		return 0;
 	}
 }
 

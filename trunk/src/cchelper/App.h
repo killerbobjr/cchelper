@@ -59,6 +59,7 @@ public:
 
 	void DrawBoard(GAMEINFO * gi);
 	void DrawPiece(char piece, int x, int y);
+
 };
 
 // DECLARATIONS OF FUNCTIONS
@@ -66,3 +67,6 @@ public:
 BOOL InitApp();
 BOOL AppLoop();
 BOOL ExitApp();
+
+void SetAlarm();
+void KillAlarm();

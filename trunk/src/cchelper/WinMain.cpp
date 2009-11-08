@@ -7,7 +7,7 @@
 #include "fastdib.h"
 #include "app.h"
 #include "appenv.h"
-
+#include <mmsystem.h>
 
 // STRUCTS
 //___________________________________________________________________________
@@ -120,10 +120,10 @@ BOOL doInit(HINSTANCE hInstance, int nCmdShow)
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CCHELPER));
 
-	//SetWindowSize(230, 235);
 	SetWindowSize(210, 235);
 
-	SetTimer( g_hWndMain, APPUPDATE_TIMER, APPUPDATE_TIME_ELAPSE, 0 );
+	SetTimer( g_hWndMain, APPUPDATE_TIMER, APPUPDATE_TIMER_ELAPSE, 0 );
+
 
 	if(!InitApp())
 		return FALSE;
@@ -289,6 +289,8 @@ void 	DrawBoardRectPic(HDC hdc)
 
 LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	static BOOL bAlarm = FALSE;
+
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
@@ -306,28 +308,29 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		switch (wmId)
 		{
 		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), g_hWndMain, About);			
+			//test();
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), g_hWndMain, About);
 			break;
 		case IDM_EXIT:
 			DestroyWindow(g_hWndMain);
 			break;
+		case IDM_SEC5:
+			AppEnv::nThinkTime = 5;			
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC5, MF_CHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_UNCHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_UNCHECKED);
+			break;
 		case IDM_SEC10:
-			AppEnv::nThinkTime = 10;			
+			AppEnv::nThinkTime = 10;
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC5, MF_UNCHECKED);
 			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_CHECKED);
 			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_UNCHECKED);
 			break;
 		case IDM_SEC30:
 			AppEnv::nThinkTime = 30;
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC5, MF_UNCHECKED);
+			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_UNCHECKED);
 			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_CHECKED);
-			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_UNCHECKED);
-			break;
-		case IDM_SEC90:
-			AppEnv::nThinkTime = 90;
-			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_CHECKED);
-			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_UNCHECKED);
-			CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_UNCHECKED);
 			break;
 		case IDM_AUTOPLAY:
 			AppEnv::bAutoPlay = !AppEnv::bAutoPlay ;
@@ -375,6 +378,7 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 			doUpdate();
 
 			return 0;
+
 		}
 		break;
 	case WM_DESTROY:

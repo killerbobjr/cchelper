@@ -1,3 +1,4 @@
+
 #include "common.h"
 #include "fastdib.h"
 #include "app.h"
@@ -6,6 +7,7 @@
 #include "ChessEngine.h"
 #include "AppEnv.h"
 #include "resource.h"
+#include <mmsystem.h>
 
 using namespace base;
 
@@ -16,16 +18,16 @@ using namespace base;
 CQQNewChessWnd	* g_pQcnWnd = NULL;
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pBoard = NULL;
-
+BOOL			g_bAlarmFlage = FALSE;
 
 BOOL InitApp()
 {
 	if(!AppEnv::LoadEnv(_T("./cchelper.ini")))
 		return FALSE;
 
-	if(AppEnv::nThinkTime == 10)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_CHECKED);
+	if(AppEnv::nThinkTime == 5)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC5, MF_CHECKED);
+	else if(AppEnv::nThinkTime == 10)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_CHECKED);
 	else if(AppEnv::nThinkTime == 30)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_CHECKED);
-	else if(AppEnv::nThinkTime == 90)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC90, MF_CHECKED);
 
 	if( !CChessBoard::LoadMedia() )
 	{
@@ -61,6 +63,7 @@ BOOL AppLoop()
 	char szCmd[1024];
 	static int lastturn=0;
 
+
 	HWND hwnd = g_pQcnWnd->GetHandle();
 	if( !hwnd )
 	{
@@ -69,6 +72,11 @@ BOOL AppLoop()
 	} 
 	else
 	{
+		if( g_pChessEngine)
+		{
+			g_pChessEngine->UpdateState();
+		}
+
 		GAMEINFO gi;
 		WINDOWPLACEMENT wp;
 		GetWindowPlacement(hwnd,&wp);
@@ -81,11 +89,14 @@ BOOL AppLoop()
 				g_pBoard->DrawBoard( &gi );
 				if(strcmp(fenCopy, gi.szFen ) != 0 && lastturn != gi.Turn )
 				{
+					KillAlarm();
+					// there is an avilble board 
 					strcpy_s(fenCopy, 256, gi.szFen);
 					lastturn = gi.Turn ;
 
 					if( gi.PlayerColor == gi.Turn  )
 					{
+						//player turn,  make move.
 						if( g_pChessEngine->IsLoaded() )
 						{
 							if( g_pChessEngine->GetState() == CChessEngine::BusyWait)
@@ -102,6 +113,12 @@ BOOL AppLoop()
 				{
 					if( gi.Turn == gi.PlayerColor && g_pChessEngine )
 					{
+						if( g_pChessEngine->GetBestMoveElapse() > 1 && 
+							g_pChessEngine->GetState() == CChessEngine::Idle && AppEnv::bAutoPlay  )
+						{
+							SetAlarm();
+						}
+
 						CChessEngine::PieceMove * mv;
 						mv = g_pChessEngine->GetBestMove();
 						if ( mv )
@@ -110,30 +127,14 @@ BOOL AppLoop()
 								g_pBoard->ShowBestMove(mv->fx, mv->fy, mv->tx, mv->ty);
 							else if (gi.PlayerColor == TURN_BLACK)
 								g_pBoard->ShowBestMove(mv->fx, 9 - mv->fy, mv->tx, 9 - mv->ty);
-
 						}
 					}
 				}
-			} 
-
-			if( g_pChessEngine)
-			{
-				g_pChessEngine->UpdateState();
 			}
+
 		}
 	}
-	//if(1) // test ocde
-	//{
-	//	GAMEINFO tgi;
-	//	tgi.PlayerColor = TURN_WHITE;
-	//	strcpy(tgi.szFen, "jmxsksxmj/9/1p5p1/b1b1b1b1b/9/9/B1B1B1B1B/1P5P1/9/JMXSKSXMJ w");
-	//	tgi.Turn = TURN_WHITE;
 
-	//	g_pBoard->DrawBoard(&tgi);
-	//	g_pBoard->ShowBestMove(0,0,2,2);
-	//}
-	//
-	//InvalidateRect(g_hWndMain,NULL,FALSE);
 	return TRUE;
 }
 
@@ -148,4 +149,28 @@ BOOL ExitApp()
 	CChessBoard::ReleaseMedia();
 
 	return TRUE;
+}
+
+
+BOOL CheckAlarm()
+{
+	return g_bAlarmFlage;
+}
+
+void SetAlarm()
+{
+	if( !g_bAlarmFlage )
+	{
+		PlaySound( AppEnv::GetMediaPath(_T("alarm.wav")), NULL,  SND_FILENAME|SND_LOOP|SND_ASYNC);
+		g_bAlarmFlage = TRUE;
+	}
+}
+
+void KillAlarm()
+{
+	if( g_bAlarmFlage )
+	{
+		PlaySound( NULL, 0, SND_ASYNC);
+		g_bAlarmFlage = FALSE;
+	}
 }

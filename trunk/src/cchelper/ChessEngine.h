@@ -2,6 +2,7 @@
 
 #include "IGameWindow.h"
 #include "IChessEngine.h"
+#include <time.h>
 
 #define INPUT_BUFFER_SIZE		(4096)
 struct PipeStruct;
@@ -37,6 +38,8 @@ private:
 
 	IGameWindow * m_pGameWindow;
 
+	time_t m_BestMoveTime;
+
 public:
 	CChessEngine(void);
 	virtual ~CChessEngine(void);
@@ -58,6 +61,7 @@ public:
 	bool IsLoaded(){ return m_bLoaded;}
 	bool InitEngine(TCHAR * szEngineFile);
 
+	time_t GetBestMoveElapse();
 	virtual void Restart();
 	virtual void GameOver();
 };

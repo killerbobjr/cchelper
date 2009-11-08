@@ -173,13 +173,20 @@ void CChessBoard::DrawPiece(char piece, int x, int y)
 	}
 }
 
+
 void CChessBoard::ShowBestMove(int fx, int fy, int tx, int ty)
 {
-	m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, fx * PIECE_DW, fy * PIECE_DH);
-	m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, tx * PIECE_DW, ty * PIECE_DH);
+	static BOOL bShowSrcRect = TRUE;
+	bShowSrcRect = !bShowSrcRect;
+	if( bShowSrcRect )
+	{
+		m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, fx * PIECE_DW, fy * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
+	} 
+	else
+	{
+		m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, tx * PIECE_DW, ty * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
+	}
 }
-
-
 
 void CChessBoard::DrawBoard(GAMEINFO * gi)
 {

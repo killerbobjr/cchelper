@@ -9,9 +9,9 @@
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
 #define IDM_AUTOPLAY		106
-#define IDM_SEC10		107
-#define IDM_SEC30		108
-#define IDM_SEC90		109
+#define IDM_SEC5		107
+#define IDM_SEC10		108
+#define IDM_SEC30		109
 
 
 #define IDI_CCHELPER			107

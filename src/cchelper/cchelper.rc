@@ -25,9 +25,9 @@ BEGIN
     POPUP "&Play"
     BEGIN
 		MENUITEM "&Auto play"			  IDM_AUTOPLAY
+        MENUITEM "5 sec",                IDM_SEC5
         MENUITEM "10 sec",                IDM_SEC10
         MENUITEM "30 sec",                IDM_SEC30
-        MENUITEM "90 sec",                IDM_SEC90
     END
     POPUP "&Help"
     BEGIN

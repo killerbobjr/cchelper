@@ -48,16 +48,16 @@ void CChessEngine::UpdateState()
 					base::Log(2,m_szInputBuf);
 					this->m_state = CChessEngine::Idle ;
 					this->m_bHasBestMove = true;
-					this->m_mvBestMove.fx = m_szInputBuf[9] - 'a';
-					this->m_mvBestMove.fy = 9 - (m_szInputBuf[10] - '0');
-					this->m_mvBestMove.tx = m_szInputBuf[11] - 'a';
-					this->m_mvBestMove.ty = 9 - (m_szInputBuf[12] - '0');
+					this->m_mvBestMove.from.x  = m_szInputBuf[9] - 'a';
+					this->m_mvBestMove.from.y  = 9 - (m_szInputBuf[10] - '0');
+					this->m_mvBestMove.to.x = m_szInputBuf[11] - 'a';
+					this->m_mvBestMove.to.y = 9 - (m_szInputBuf[12] - '0');
+					this->m_mvBestMove.timestamp = time(NULL);
 					this->m_BestMoveTime = time(NULL);
 
 					if( AppEnv::bAutoPlay && m_pGameWindow )
 					{
-						m_pGameWindow->MovePiece(m_mvBestMove.fx, m_mvBestMove.fy,
-							m_mvBestMove.tx, m_mvBestMove.ty);
+						m_pGameWindow->MovePiece(&m_mvBestMove);
 					}
 				}
 			}

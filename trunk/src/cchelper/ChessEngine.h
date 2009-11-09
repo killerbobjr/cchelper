@@ -10,20 +10,7 @@ struct PipeStruct;
 class CChessEngine
 	:public IChessEngine
 {
-public:
-	struct PieceMove
-	{
-		int fx;
-		int fy;
-		int tx;
-		int ty;
-	};
 
-	enum EngineState
-	{
-		BusyWait,
-		Idle,
-	};
 
 private:
 	PipeStruct * m_pPipe;

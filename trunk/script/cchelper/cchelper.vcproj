@@ -221,6 +221,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\cchelper\ChessBoard.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\cchelper\ChessEngine.h"
 				>
 			</File>

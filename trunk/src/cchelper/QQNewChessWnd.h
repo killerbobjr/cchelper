@@ -41,7 +41,7 @@ class CQQNewChessWnd : public IGameWindow
 
 	char m_fen[256];
 
-	GAMEINFO m_gi;
+	//GAMEWINDOWINFO m_gi;
 
 public:
 	 int ox ;
@@ -52,8 +52,8 @@ public:
 
 private:
 
-	bool ReadTurn(GAMEINFO * pgi);
-	bool ReadFen(GAMEINFO * pgi);
+	bool ReadTurn(GAMEWINDOWINFO * pgi);
+	bool ReadFen(GAMEWINDOWINFO * pgi);
 
 	virtual char	GetPiece( int x, int y) ;
 	virtual DWORD GetHashValue( int x, int y );
@@ -63,14 +63,15 @@ public:
 	~CQQNewChessWnd(void);
 
 	COLORREF * CQQNewChessWnd::GetRectData(int x, int y);
+
 	bool Attach(HWND hwnd);
 
-	virtual BOOL MovePiece(int fx, int fy, int tx, int ty );
+	virtual BOOL MovePiece(IChessEngine::PieceMove * pmv);
 
 	void DumpBoradHash();
 
 
-	virtual bool ReadWindow(GAMEINFO * pgi) ;
+	virtual bool ReadGameWindowInfo() ;
 
 	virtual HWND GetHandle(void)
 	{ 

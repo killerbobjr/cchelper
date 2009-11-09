@@ -6,6 +6,7 @@
 #include "QQNewChessWnd.h"
 #include "ChessEngine.h"
 #include "AppEnv.h"
+#include "ChessBoard.h"
 #include "resource.h"
 #include <mmsystem.h>
 
@@ -77,15 +78,16 @@ BOOL AppLoop()
 			g_pChessEngine->UpdateState();
 		}
 
-		GAMEINFO gi;
+		GAMEWINDOWINFO gi ;
 		WINDOWPLACEMENT wp;
 		GetWindowPlacement(g_pQcnWnd->GetFrameWnd(),&wp);
 
 		if (wp.showCmd == SW_SHOWNORMAL)
 		{
 			memset( &gi, 0, sizeof(gi));
-			if( g_pQcnWnd->ReadWindow(&gi) )
+			if( g_pQcnWnd->ReadGameWindowInfo() )
 			{
+				gi = g_pQcnWnd->GetGameWindowInfo();
 				g_pBoard->DrawBoard( &gi );
 				if(strcmp(fenCopy, gi.szFen ) != 0 && lastturn != gi.Turn )
 				{
@@ -124,9 +126,9 @@ BOOL AppLoop()
 						if ( mv )
 						{
 							if ( gi.PlayerColor == TURN_WHITE )
-								g_pBoard->ShowBestMove(mv->fx, mv->fy, mv->tx, mv->ty);
+								g_pBoard->ShowBestMove(mv->from.x , mv->from.y, mv->to.x , mv->to.y );
 							else if (gi.PlayerColor == TURN_BLACK)
-								g_pBoard->ShowBestMove(mv->fx, 9 - mv->fy, mv->tx, 9 - mv->ty);
+								g_pBoard->ShowBestMove(mv->from.x , 9 - mv->from.y , mv->to.x , 9 - mv->to.y );
 						}
 					}
 				}

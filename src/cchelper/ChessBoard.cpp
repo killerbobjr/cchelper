@@ -4,6 +4,7 @@
 #include "IGameWindow.h"
 #include "QQNewChessWnd.h"
 #include "ChessEngine.h"
+#include "ChessBoard.h"
 #include "AppEnv.h"
 
 using namespace base;
@@ -188,7 +189,7 @@ void CChessBoard::ShowBestMove(int fx, int fy, int tx, int ty)
 	}
 }
 
-void CChessBoard::DrawBoard(GAMEINFO * gi)
+void CChessBoard::DrawBoard(GAMEWINDOWINFO * gi)
 {
 	assert( g_pMainSurface && m_pBoardDIB )	;
 

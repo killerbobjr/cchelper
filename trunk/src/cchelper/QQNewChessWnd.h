@@ -7,10 +7,10 @@ enum QncDlgItemEnum
 {
 	QNC_START_BTN	=	0,
 	QNC_DRAWN_BTN	=	1,
-	QNC_LOST_BTN		=	2,
+	QNC_LOST_BTN	=	2,
 	QNC_RETRACT		=  3,
 	QNC_TOOLS_BTN	=	4,
-	QNC_DISCS_BTN		=	5,
+	QNC_DISCS_BTN	=	5,
 	QNC_ITEMSIZE		
 };
 
@@ -41,22 +41,29 @@ class CQQNewChessWnd : public IGameWindow
 
 	char m_fen[256];
 
-	//GAMEWINDOWINFO m_gi;
 
-public:
-	 int ox ;
-	 int oy ;
+private:
 
-	 int dx ; 
-	 int dy ;
+	POINT m_ptBoardOrigin;
+	SIZE  m_sizeSquare;
+	POINT m_ptSampleOrigin;
+	int   m_nSampleLen;
+
+	POINT GetSquareOrigin(int squarex, int squarey)
+	{
+		POINT pt;
+		pt.x = m_ptBoardOrigin.x + squarex * m_sizeSquare.cx;
+		pt.y = m_ptBoardOrigin.y + squarey * m_sizeSquare.cy;
+		return pt;
+	}
 
 private:
 
 	bool ReadTurn(GAMEWINDOWINFO * pgi);
 	bool ReadFen(GAMEWINDOWINFO * pgi);
 
-	virtual char	GetPiece( int x, int y) ;
-	virtual DWORD GetHashValue( int x, int y );
+	virtual char	GetPiece( int squarex, int squarey) ;
+	virtual DWORD GetHashValue( int squarex, int squarey );
 
 public:
 	CQQNewChessWnd(void);

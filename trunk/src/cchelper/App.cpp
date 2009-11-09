@@ -16,7 +16,7 @@ using namespace base;
 // GLOBAL VALUES
 //___________________________________________________________________________
 
-CQQNewChessWnd	* g_pQcnWnd = NULL;
+CQQNewChessWnd	* g_pQncWnd = NULL;
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pBoard = NULL;
 BOOL			g_bAlarmFlage = FALSE;
@@ -35,14 +35,17 @@ BOOL InitApp()
 		return FALSE;
 	}
 
-	g_pQcnWnd = new CQQNewChessWnd();
+	g_pQncWnd = new CQQNewChessWnd();
+
+	g_pQncWnd->LoadHashValue(_T("hv_qq.ini"));
+
 
 	g_pBoard = new CChessBoard();
 
 	g_pChessEngine = new CChessEngine();
 
-	g_pQcnWnd->SetChessEngine(g_pChessEngine);
-	g_pChessEngine->SetGameWindow(g_pQcnWnd);
+	g_pQncWnd->SetChessEngine(g_pChessEngine);
+	g_pChessEngine->SetGameWindow(g_pQncWnd);
 
 #ifdef ENGINE_CCE
 	g_pChessEngine->InitEngine("cce.exe");
@@ -65,10 +68,10 @@ BOOL AppLoop()
 	static int lastturn=0;
 
 
-	HWND hwnd = g_pQcnWnd->GetHandle();
+	HWND hwnd = g_pQncWnd->GetHandle();
 	if( !hwnd )
 	{
-		g_pQcnWnd->FindQQNewChessWindow();
+		g_pQncWnd->FindQQNewChessWindow();
 		g_pBoard->DrawBoard( NULL );
 	} 
 	else
@@ -80,14 +83,14 @@ BOOL AppLoop()
 
 		GAMEWINDOWINFO gi ;
 		WINDOWPLACEMENT wp;
-		GetWindowPlacement(g_pQcnWnd->GetFrameWnd(),&wp);
+		GetWindowPlacement(g_pQncWnd->GetFrameWnd(),&wp);
 
 		if (wp.showCmd == SW_SHOWNORMAL)
 		{
 			memset( &gi, 0, sizeof(gi));
-			if( g_pQcnWnd->ReadGameWindowInfo() )
+			if( g_pQncWnd->ReadGameWindowInfo() )
 			{
-				gi = g_pQcnWnd->GetGameWindowInfo();
+				gi = g_pQncWnd->GetGameWindowInfo();
 				g_pBoard->DrawBoard( &gi );
 				if(strcmp(fenCopy, gi.szFen ) != 0 && lastturn != gi.Turn )
 				{
@@ -148,7 +151,7 @@ BOOL ExitApp()
 {
 	if( g_pBoard ) delete g_pBoard;
 
-	if ( g_pQcnWnd ) delete g_pQcnWnd;
+	if ( g_pQncWnd ) delete g_pQncWnd;
 
 	if ( g_pChessEngine) delete g_pChessEngine;
 

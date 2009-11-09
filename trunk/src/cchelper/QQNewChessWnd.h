@@ -70,6 +70,7 @@ public:
 
 	void DumpBoradHash();
 
+	bool LoadHashValue(TCHAR * szFile);
 
 	virtual bool ReadGameWindowInfo() ;
 

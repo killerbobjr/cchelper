@@ -20,6 +20,13 @@ public:
 	};
 
 public:
+	virtual EngineState GetState() = 0;
+	virtual BOOL IsLoaded() = 0;
+	virtual void UpdateState() = 0;
 	virtual void Restart() = 0;
 	virtual void GameOver() = 0;
+
+	virtual void Go(char * szFen) = 0;
+	virtual void Stop() = 0;
+	virtual PieceMove * GetBestMove() = 0 ;
 };

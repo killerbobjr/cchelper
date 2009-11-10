@@ -40,13 +40,15 @@ public:
 
 	PieceMove * GetBestMove() { if ( m_bHasBestMove ) return &m_mvBestMove ; else return NULL ; };
 
-	void UpdateState();
+	virtual void UpdateState();
+
+	virtual void Go(char * szFen) ;
 	void Stop();
 	
 	void SendCommand(const char * cmd);
 
-	bool IsLoaded(){ return m_bLoaded;}
-	bool InitEngine(TCHAR * szEngineFile);
+	BOOL IsLoaded(){ return m_bLoaded;}
+	BOOL InitEngine(TCHAR * szEngineFile);
 
 	time_t GetBestMoveElapse();
 	virtual void Restart();

@@ -195,18 +195,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\json\json_reader.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\json\json_value.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\json\json_writer.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\base\log.cpp"
 				>
 			</File>
@@ -253,22 +241,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\json\json_batchallocator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\json\json_internalarray.inl"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\json\json_internalmap.inl"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\json\json_valueiterator.inl"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\log.h"
 				>
 			</File>
@@ -288,6 +260,38 @@
 			>
 			<File
 				RelativePath="..\..\src\cchelper\cchelper.rc"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Json"
+			>
+			<File
+				RelativePath="..\..\src\json\json_batchallocator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\json\json_internalarray.inl"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\json\json_internalmap.inl"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\json\json_reader.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\json\json_value.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\json\json_valueiterator.inl"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\json\json_writer.cpp"
 				>
 			</File>
 		</Filter>

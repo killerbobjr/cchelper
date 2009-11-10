@@ -2,7 +2,6 @@
 #include "fastdib.h"
 #include "app.h"
 #include "IGameWindow.h"
-#include "QQNewChessWnd.h"
 #include "ChessEngine.h"
 #include "ChessBoard.h"
 #include "AppEnv.h"
@@ -13,6 +12,7 @@ using namespace base;
 //___________________________________________________________________________
 CFastDIB * CChessBoard::m_pBoardDIB = NULL;
 CFastDIB * CChessBoard::m_pMoveRectDIB = NULL;
+CFastDIB * CChessBoard::m_pBackgroundDIB = NULL;
 
 //PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
 //	{ 'J', PIECEHV_RJ, MEDIAFILE(_T("CRJ.BMP")), 0 },
@@ -74,6 +74,8 @@ PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
 #endif
 CChessBoard::CChessBoard()
 {
+	m_pGameWindow = NULL;
+	m_pChessEngine = NULL;
 }
 
 CChessBoard::~CChessBoard()
@@ -107,6 +109,17 @@ BOOL CChessBoard::LoadMedia()
 			{
 				hr = m_pBoardDIB->LoadFromFile(
 					AppEnv::GetMediaPath(_T("CBOARD.BMP")));
+				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
+			}
+		}
+
+		if ( !m_pBackgroundDIB )
+		{
+			m_pBackgroundDIB = new CFastDIB();
+			if( m_pBackgroundDIB )
+			{
+				hr = m_pBackgroundDIB->LoadFromFile(
+					AppEnv::szBackgoundBmp);
 				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
 			}
 		}
@@ -150,6 +163,12 @@ void CChessBoard::ReleaseMedia()
 		m_pBoardDIB = NULL;
 	}
 
+	if ( m_pBackgroundDIB  )
+	{
+		delete m_pBackgroundDIB;
+		m_pBackgroundDIB = NULL;
+	}
+
 	if( m_pMoveRectDIB )
 	{
 		delete m_pMoveRectDIB;
@@ -158,9 +177,9 @@ void CChessBoard::ReleaseMedia()
 
 }
 
-void CChessBoard::DrawPiece( PieceStruct& ps, int x , int y )
+void CChessBoard::DrawPiece( PieceStruct& ps, int squarex , int squarey )
 {
-	ps.pDib->Draw( g_pMainSurface, DRAWMODE_NORMAL, x * PIECE_DW, y * PIECE_DH );
+	ps.pDib->Draw( g_pMainSurface, DRAWMODE_NORMAL, squarex * PIECE_DW, squarey * PIECE_DH );
 }
 
 void CChessBoard::DrawPiece(char piece, int x, int y)
@@ -174,28 +193,136 @@ void CChessBoard::DrawPiece(char piece, int x, int y)
 	}
 }
 
-
-void CChessBoard::ShowBestMove(int fx, int fy, int tx, int ty)
+POINT CChessBoard::GetSquareOrigin(int squarex, int squarey )
 {
-	static BOOL bShowSrcRect = TRUE;
-	bShowSrcRect = !bShowSrcRect;
-	if( bShowSrcRect )
-	{
-		m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, fx * PIECE_DW, fy * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
-	} 
-	else
-	{
-		m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, tx * PIECE_DW, ty * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
-	}
+	POINT pt;
+	pt.x = squarex * PIECE_DW;
+	pt.y = squarey * PIECE_DH;
+	return pt;
 }
+
+void CChessBoard::ShowBestMove(CChessEngine::PieceMove * mv)
+{
+	assert(mv);
+	assert(m_pGameWindow);
+
+
+	GAMEWINDOWINFO gwi = m_pGameWindow->GetGameWindowInfo();
+
+	if( gwi.bAvailible && !gwi.bGameOver && gwi.PlayerColor == gwi.Turn )
+	{
+		POINT ptSrc, ptDst;
+
+		if( gwi.PlayerColor == TURN_WHITE )
+		{
+			ptSrc = this->GetSquareOrigin(mv->from.x, mv->from.y);
+			ptDst = this->GetSquareOrigin(mv->to.x , mv->to.y );
+		}
+		else if( gwi.PlayerColor == TURN_BLACK )
+		{
+			ptSrc = this->GetSquareOrigin(mv->from.x, 9 - mv->from.y );
+			ptDst = this->GetSquareOrigin(mv->to.x, 9 - mv->to.y );
+		}
+
+		static BOOL bShowSrcFocus = TRUE;
+		
+		bShowSrcFocus = !bShowSrcFocus;
+		if( bShowSrcFocus )
+		{
+			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, ptSrc.x , ptSrc.y,0,0,0,0,255 ,1,0x00ff0000);
+		} 
+		else
+		{
+			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, ptDst.x, ptDst.y,0,0,0,0,255 ,1,0x00ff0000);
+		}
+	}
+	
+}
+
+void CChessBoard::Update()
+{
+	assert( GetGameWindow() && GetChessEngine() );
+
+	char szCmd[1024];
+
+	GetChessEngine()->UpdateState();
+
+	GAMEWINDOWINFO gi ;
+	WINDOWPLACEMENT wp;
+	GetWindowPlacement( GetGameWindow()->GetFrameWindowHandle(),&wp);
+
+	if (wp.showCmd == SW_SHOWNORMAL)
+	{
+		memset( &gi, 0, sizeof(gi));
+		if( GetGameWindow()->ReadGameWindowInfo() )
+		{
+			gi = GetGameWindow()->GetGameWindowInfo();
+			DrawBoard( &gi );
+			if( gi.bTurnChanged )
+			{
+				KillAlarm();
+				if( gi.PlayerColor == gi.Turn  )
+				{
+					GetChessEngine()->Go(gi.szFen);
+				}
+			}
+			else 
+			{
+				if( gi.Turn == gi.PlayerColor )
+				{
+					IChessEngine::PieceMove * mv;
+					mv = GetChessEngine()->GetBestMove();
+					if ( mv )
+					{
+						if( AppEnv::bAutoPlay )
+						{
+							time_t now = time(NULL);
+							if( now - mv->timestamp > 1 )
+							{
+								SetAlarm();
+							}
+						}
+						ShowBestMove(mv);
+					}
+				}
+			}
+		}
+	} 
+	else if ( wp.showCmd == SW_SHOWMINIMIZED )
+	{
+		DrawBoard( NULL );
+	}
+
+}
+
+//
+//void CChessBoard::ShowBestMove(int squarex1, int squarey1, int squarex2, int squarey2)
+//{
+//	if( gwi.bAvailible )
+//	{
+//		static BOOL bShowSrcRect = TRUE;
+//		bShowSrcRect = !bShowSrcRect;
+//		if( bShowSrcRect )
+//		{
+//			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, fx * PIECE_DW, fy * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
+//		} 
+//		else
+//		{
+//			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, tx * PIECE_DW, ty * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
+//		}
+//	}
+//	
+//}
 
 void CChessBoard::DrawBoard(GAMEWINDOWINFO * gi)
 {
 	assert( g_pMainSurface && m_pBoardDIB )	;
 
+	m_pBackgroundDIB->Draw(g_pMainSurface);
+	m_pBoardDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL);
+
 	if ( gi == NULL )
 	{
-		m_pBoardDIB->Draw( g_pMainSurface );
 		return;
 	}
 
@@ -206,7 +333,6 @@ void CChessBoard::DrawBoard(GAMEWINDOWINFO * gi)
 
 	c = *lpFen;
 
-	m_pBoardDIB->Draw( g_pMainSurface );
 	while( c && c != ' ')
 	{
 		if( c >= '0' && c <= '9' )

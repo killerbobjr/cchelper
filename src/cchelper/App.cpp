@@ -15,14 +15,14 @@ using namespace base;
 
 // GLOBAL VALUES
 //___________________________________________________________________________
-
+IGameWindow		* g_pGameWnd = NULL;
 CQQNewChessWnd	* g_pQncWnd = NULL;
 CChessEngine	* g_pChessEngine = NULL;
-CChessBoard		* g_pBoard = NULL;
+CChessBoard		* g_pChessBoard = NULL;
 BOOL			g_bAlarmFlage = FALSE;
 
 BOOL InitApp()
-{
+{	
 	if(!AppEnv::LoadEnv(_T("./cchelper.ini")))
 		return FALSE;
 
@@ -37,15 +37,18 @@ BOOL InitApp()
 
 	g_pQncWnd = new CQQNewChessWnd();
 
-	g_pQncWnd->LoadHashValue(_T("hv_qq.ini"));
+	if(!g_pQncWnd->LoadHashValue(_T("hv_qq.ini")))
+	{
+		return FALSE;
+	}
 
 
-	g_pBoard = new CChessBoard();
+	g_pChessBoard = new CChessBoard();
 
 	g_pChessEngine = new CChessEngine();
 
-	g_pQncWnd->SetChessEngine(g_pChessEngine);
-	g_pChessEngine->SetGameWindow(g_pQncWnd);
+	g_pChessBoard->SetChessEngine( g_pChessEngine );
+
 
 #ifdef ENGINE_CCE
 	g_pChessEngine->InitEngine("cce.exe");
@@ -54,7 +57,11 @@ BOOL InitApp()
 	{
 		base::Log(0,"Load engine success");
 	}
-	else return false;
+	else 
+	{
+		base::Log(0,"Load engine failed");
+		return FALSE;
+	}
 #endif
 	assert(g_pChessEngine->IsLoaded() );
 	return TRUE;
@@ -62,86 +69,22 @@ BOOL InitApp()
 
 BOOL AppLoop()
 {
-	static char fenCopy[256];
+	IGameWindow * pgw;
 
-	char szCmd[1024];
-	static int lastturn=0;
-
+	pgw = g_pChessBoard->GetGameWindow();
 
 	HWND hwnd = g_pQncWnd->GetHandle();
-	if( !hwnd )
+	if( !pgw )
 	{
-		g_pQncWnd->FindQQNewChessWindow();
-		g_pBoard->DrawBoard( NULL );
+		if(g_pQncWnd->FindQQNewChessWindow())
+		{
+			g_pChessBoard->SetGameWindow(g_pQncWnd);
+		}
+		g_pChessBoard->DrawBoard( NULL );
 	} 
 	else
 	{
-		if( g_pChessEngine)
-		{
-			g_pChessEngine->UpdateState();
-		}
-
-		GAMEWINDOWINFO gi ;
-		WINDOWPLACEMENT wp;
-		GetWindowPlacement(g_pQncWnd->GetFrameWnd(),&wp);
-
-		if (wp.showCmd == SW_SHOWNORMAL)
-		{
-			memset( &gi, 0, sizeof(gi));
-			if( g_pQncWnd->ReadGameWindowInfo() )
-			{
-				gi = g_pQncWnd->GetGameWindowInfo();
-				g_pBoard->DrawBoard( &gi );
-				if(strcmp(fenCopy, gi.szFen ) != 0 && lastturn != gi.Turn )
-				{
-					KillAlarm();
-					// there is an avilble board 
-					strcpy_s(fenCopy, 256, gi.szFen);
-					lastturn = gi.Turn ;
-
-					if( gi.PlayerColor == gi.Turn  )
-					{
-						//player turn,  make move.
-						if( g_pChessEngine->IsLoaded() )
-						{
-							if( g_pChessEngine->GetState() == CChessEngine::BusyWait)
-							{
-								g_pChessEngine->Stop();
-							}
-							sprintf(szCmd, "position fen %s", gi.szFen );
-							g_pChessEngine->SendCommand(szCmd);
-							sprintf(szCmd, "go time %d", AppEnv::nThinkTime );
-							g_pChessEngine->SendCommand(szCmd);
-						}
-					}
-				}else 
-				{
-					if( gi.Turn == gi.PlayerColor && g_pChessEngine )
-					{
-						if( g_pChessEngine->GetBestMoveElapse() > 1 && 
-							g_pChessEngine->GetState() == CChessEngine::Idle && AppEnv::bAutoPlay  )
-						{
-							SetAlarm();
-						}
-
-						CChessEngine::PieceMove * mv;
-						mv = g_pChessEngine->GetBestMove();
-						if ( mv )
-						{
-							if ( gi.PlayerColor == TURN_WHITE )
-								g_pBoard->ShowBestMove(mv->from.x , mv->from.y, mv->to.x , mv->to.y );
-							else if (gi.PlayerColor == TURN_BLACK)
-								g_pBoard->ShowBestMove(mv->from.x , 9 - mv->from.y , mv->to.x , 9 - mv->to.y );
-						}
-					}
-				}
-			}
-
-		} 
-		else if ( wp.showCmd == SW_SHOWMINIMIZED )
-		{
-			g_pBoard->DrawBoard( NULL );
-		}
+		g_pChessBoard->Update();
 	}
 
 	return TRUE;
@@ -149,7 +92,7 @@ BOOL AppLoop()
 
 BOOL ExitApp()
 {
-	if( g_pBoard ) delete g_pBoard;
+	if( g_pChessBoard ) delete g_pChessBoard;
 
 	if ( g_pQncWnd ) delete g_pQncWnd;
 
@@ -160,11 +103,6 @@ BOOL ExitApp()
 	return TRUE;
 }
 
-
-BOOL CheckAlarm()
-{
-	return g_bAlarmFlage;
-}
 
 void SetAlarm()
 {

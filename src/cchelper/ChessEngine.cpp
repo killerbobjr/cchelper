@@ -109,16 +109,35 @@ void CChessEngine::Stop()
 	}
 }
 
+//@description
+//If turn changed and engine still thinking(player make a move before 
+// engine drag out a move), then stop it and make an new think.
+//_________________________________________________________________________________
+void CChessEngine::Go(char * szFen)
+{
+	char szCmd[1024];
+	assert(szFen);
+
+	if( IsLoaded() )
+	{
+		if( GetState() == IChessEngine::BusyWait)
+		{
+			Stop();
+		}
+		sprintf(szCmd, "position fen %s", szFen );
+		SendCommand(szCmd);
+		sprintf(szCmd, "go time %d", AppEnv::nThinkTime );
+		SendCommand(szCmd);
+		m_bHasBestMove = false;
+		m_state = IChessEngine::BusyWait ;
+
+	}
+}
+
 void CChessEngine::SendCommand(const char * cmd)
 {
 	if( m_pPipe )
 	{
-		if( strncmp(cmd, "go", 2) == 0 )
-		{
-			this->m_bHasBestMove = false;
-			this->m_state = CChessEngine::BusyWait ;
-		}
-
 		m_pPipe->LineOutput(cmd);
 		base::Log(2,cmd);
 	}
@@ -138,7 +157,7 @@ time_t CChessEngine::GetBestMoveElapse()
 	}
 }
 
-bool CChessEngine::InitEngine(TCHAR * szEngineFile)
+BOOL CChessEngine::InitEngine(TCHAR * szEngineFile)
 {
 	if( !m_pPipe )
 		m_pPipe = new PipeStruct();

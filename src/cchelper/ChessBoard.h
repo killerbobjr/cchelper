@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IGameWindow.h"
+#include "IChessEngine.h"
 
 // DEFINES
 //___________________________________________________________________________s
@@ -34,6 +35,7 @@ struct PieceStruct
 class CChessBoard
 {
 	static CFastDIB		*m_pBoardDIB;
+	static CFastDIB		*m_pBackgroundDIB;
 	static CFastDIB		*m_pMoveRectDIB;
 	static PieceStruct	m_tPieceStructs[PIECE_NUM];
 
@@ -43,20 +45,49 @@ public:
 
 private:
 
-	char m_fen[256];
+	IGameWindow * m_pGameWindow;
+	IChessEngine * m_pChessEngine;
 
 private:
-	void DrawPiece( PieceStruct& ps, int x , int y );
+	void DrawPiece( PieceStruct& ps, int squarex , int squarey );
+	POINT GetSquareOrigin(int squarex, int squarey );
 
 public:
 	CChessBoard();
 	~CChessBoard();
 
-	const char * CatureToFen(IGameWindow * pgw);
+	void SetGameWindow(IGameWindow * pgw)
+	{
+		m_pGameWindow = pgw;
+	}
 
-	const char * GetFen() { return m_fen; }
-	
-	void ShowBestMove(int fx, int fy, int tx, int ty);
+	void SetChessEngine(IChessEngine * pce)
+	{
+		m_pChessEngine = pce;
+	}
+
+	IChessEngine * GetChessEngine()
+	{
+		return m_pChessEngine;
+	}
+
+	IGameWindow * GetGameWindow()
+	{
+		if( m_pGameWindow && m_pGameWindow->GetHandle())
+		{
+			return m_pGameWindow;
+		} 
+		else
+		{
+			m_pGameWindow = NULL;
+			return NULL;
+		}
+	}
+
+	void Update();
+
+	void ShowBestMove(CChessEngine::PieceMove * mv);
+	void ShowBestMove(int squarex1, int squarey1, int squarex2, int squarey2);
 
 	void DrawBoard(GAMEWINDOWINFO * gi);
 	void DrawPiece(char piece, int x, int y);

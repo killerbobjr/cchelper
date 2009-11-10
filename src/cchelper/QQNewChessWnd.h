@@ -77,6 +77,7 @@ public:
 
 	void DumpBoradHash();
 
+	bool SaveHashValue(TCHAR * szFile);
 	bool LoadHashValue(TCHAR * szFile);
 
 	virtual bool ReadGameWindowInfo() ;
@@ -91,7 +92,7 @@ public:
 		return NULL; 
 	}
 
-	HWND GetFrameWnd() { return m_hwndFrame; }
+	virtual HWND GetFrameWindowHandle() { return m_hwndFrame; }
 
 	HWND FindQQNewChessWindow();
 	DWORD CQQNewChessWnd::GetHashValue( int x, int y, int len );

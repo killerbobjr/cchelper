@@ -93,5 +93,9 @@ public:
 	virtual BOOL MovePiece(IChessEngine::PieceMove * pmv) = 0;
 
 
+	// @description
+	// Get frame window 
+	//_________________________________________________________________________________________
+	virtual HWND GetFrameWindowHandle() = 0;
 
 };

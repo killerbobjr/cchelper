@@ -59,6 +59,10 @@ public:
 	void SetGameWindow(IGameWindow * pgw)
 	{
 		m_pGameWindow = pgw;
+		if( GetChessEngine() )
+		{
+			GetChessEngine()->Restart();
+		}
 	}
 
 	void SetChessEngine(IChessEngine * pce)

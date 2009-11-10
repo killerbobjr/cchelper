@@ -10,7 +10,7 @@ public:
 	{
 		POINT from;			// position of the source location
 		POINT to;			// position of the target location
-		time_t timestamp;	// timestamp of getting the best move
+		time_t mvtimestamp;	// timestamp of getting the best move
 	};
 
 	enum EngineState

@@ -5,6 +5,7 @@
 #include "ChessEngine.h"
 #include "ChessBoard.h"
 #include "AppEnv.h"
+#include "resource.h"
 
 using namespace base;
 
@@ -243,8 +244,6 @@ void CChessBoard::Update()
 {
 	assert( GetGameWindow() && GetChessEngine() );
 
-	char szCmd[1024];
-
 	GetChessEngine()->UpdateState();
 
 	GAMEWINDOWINFO gi ;
@@ -257,32 +256,60 @@ void CChessBoard::Update()
 		if( GetGameWindow()->ReadGameWindowInfo() )
 		{
 			gi = GetGameWindow()->GetGameWindowInfo();
-			DrawBoard( &gi );
-			if( gi.bTurnChanged )
+			if( gi.bAvailible && !gi.bGameOver )
 			{
-				KillAlarm();
-				if( gi.PlayerColor == gi.Turn  )
+				DrawBoard( &gi );
+
+				if( gi.bObserverMode )
+					EnableMenuItem(GetMenu(g_hWndMain),IDM_AUTOPLAY,MF_DISABLED);
+				else
+					EnableMenuItem(GetMenu(g_hWndMain),IDM_AUTOPLAY,MF_ENABLED);
+
+				if( gi.PlayerColor != gi.Turn )
 				{
-					GetChessEngine()->Go(gi.szFen);
+					KillAlarm();
+					GetChessEngine()->Stop();
+					SetWindowText(g_hWndMain, _T("waiting..."));
 				}
-			}
-			else 
-			{
-				if( gi.Turn == gi.PlayerColor )
+				else 
 				{
-					IChessEngine::PieceMove * mv;
-					mv = GetChessEngine()->GetBestMove();
-					if ( mv )
+					if( GetChessEngine()->GetState() == IChessEngine::Idle )
 					{
-						if( AppEnv::bAutoPlay )
+						//it is player turn, and engine idle.
+						IChessEngine::PieceMove * mv;
+						mv = GetChessEngine()->GetBestMove();
+						if ( !mv )
 						{
-							time_t now = time(NULL);
-							if( now - mv->timestamp > 1 )
+							//there are no best move and engine idle, make a think...
+							GetChessEngine()->Go(gi.szFen);
+						}
+						else 
+						{
+							//already have a bestmove then, make the move.
+							SetWindowText(g_hWndMain, _T("Got a move"));
+							ShowBestMove(mv);
+							if( AppEnv::bAutoPlay && !gi.bObserverMode )
 							{
-								SetAlarm();
+								if ( mv->mvtimestamp == 0 )
+								{
+									mv->mvtimestamp = time(NULL);
+									GetGameWindow()->MovePiece(mv);
+								} 
+								else
+								{
+									time_t now = time(NULL);
+									if( now - mv->mvtimestamp > 1 )
+									{
+										SetAlarm();
+									}
+								}
 							}
 						}
-						ShowBestMove(mv);
+					} 
+					else 
+					{
+						// todo : draw thinking....
+						SetWindowText(g_hWndMain, _T("thinking..."));
 					}
 				}
 			}

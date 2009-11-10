@@ -322,24 +322,6 @@ void CChessBoard::Update()
 
 }
 
-//
-//void CChessBoard::ShowBestMove(int squarex1, int squarey1, int squarex2, int squarey2)
-//{
-//	if( gwi.bAvailible )
-//	{
-//		static BOOL bShowSrcRect = TRUE;
-//		bShowSrcRect = !bShowSrcRect;
-//		if( bShowSrcRect )
-//		{
-//			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, fx * PIECE_DW, fy * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
-//		} 
-//		else
-//		{
-//			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, tx * PIECE_DW, ty * PIECE_DH,0,0,0,0,255 ,1,0x00ff0000);
-//		}
-//	}
-//	
-//}
 
 void CChessBoard::DrawBoard(GAMEWINDOWINFO * gi)
 {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IGameWindow.h"
 #include "IChessEngine.h"
 #include <time.h>
 
@@ -23,18 +22,10 @@ private:
 	PieceMove m_mvBestMove;
 	int m_nSkipBestMoveCount;
 
-	IGameWindow * m_pGameWindow;
-
-	time_t m_BestMoveTime;
-
 public:
 	CChessEngine(void);
 	virtual ~CChessEngine(void);
 
-	void SetGameWindow(IGameWindow * pgw)
-	{
-		m_pGameWindow = pgw;
-	}
 
 	EngineState GetState() { return m_state; }
 

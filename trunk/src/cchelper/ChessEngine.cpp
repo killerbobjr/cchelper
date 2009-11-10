@@ -9,6 +9,7 @@ CChessEngine::CChessEngine(void)
 	m_pPipe = NULL;
 	m_bLoaded = false;
 	m_nSkipBestMoveCount = 0;
+	m_bHasBestMove = false;
 }
 
 
@@ -52,13 +53,8 @@ void CChessEngine::UpdateState()
 					this->m_mvBestMove.from.y  = 9 - (m_szInputBuf[10] - '0');
 					this->m_mvBestMove.to.x = m_szInputBuf[11] - 'a';
 					this->m_mvBestMove.to.y = 9 - (m_szInputBuf[12] - '0');
-					this->m_mvBestMove.timestamp = time(NULL);
-					this->m_BestMoveTime = time(NULL);
+					this->m_mvBestMove.mvtimestamp = 0;
 
-					if( AppEnv::bAutoPlay && m_pGameWindow )
-					{
-						m_pGameWindow->MovePiece(&m_mvBestMove);
-					}
 				}
 			}
 		}
@@ -96,11 +92,10 @@ void CChessEngine::Restart()
 void CChessEngine::Stop()
 {
 	if ( m_pPipe )
-	{
-		SendCommand("stop");
-		
+	{		
 		if( g_pChessEngine->GetState() == CChessEngine::BusyWait )
 		{
+			SendCommand("stop");
 			this->m_nSkipBestMoveCount ++;
 		}
 		
@@ -117,21 +112,16 @@ void CChessEngine::Go(char * szFen)
 {
 	char szCmd[1024];
 	assert(szFen);
-
-	if( IsLoaded() )
+	if( g_pChessEngine->GetState() == CChessEngine::BusyWait )
 	{
-		if( GetState() == IChessEngine::BusyWait)
-		{
-			Stop();
-		}
-		sprintf(szCmd, "position fen %s", szFen );
-		SendCommand(szCmd);
-		sprintf(szCmd, "go time %d", AppEnv::nThinkTime );
-		SendCommand(szCmd);
-		m_bHasBestMove = false;
-		m_state = IChessEngine::BusyWait ;
-
+		Stop();
 	}
+	sprintf(szCmd, "position fen %s", szFen );
+	SendCommand(szCmd);
+	sprintf(szCmd, "go time %d", AppEnv::nThinkTime );
+	SendCommand(szCmd);
+	m_bHasBestMove = false;
+	m_state = IChessEngine::BusyWait ;
 }
 
 void CChessEngine::SendCommand(const char * cmd)
@@ -143,19 +133,6 @@ void CChessEngine::SendCommand(const char * cmd)
 	}
 }
 
-time_t CChessEngine::GetBestMoveElapse()
-{
-	if( m_bHasBestMove )
-	{
-		time_t now;
-		now = time(NULL);
-		return( now - this->m_BestMoveTime );
-	} 
-	else
-	{
-		return 0;
-	}
-}
 
 BOOL CChessEngine::InitEngine(TCHAR * szEngineFile)
 {

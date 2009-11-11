@@ -6,10 +6,6 @@
 // DEFINES
 //___________________________________________________________________________s
 
-#define PIECE_W		(18)
-#define PIECE_H		(18)
-#define PIECE_DW	(24)
-#define PIECE_DH	(24)
 
 
 #define PIECE_NUM	(14)
@@ -24,8 +20,6 @@
 struct PieceStruct
 {
 	char		cPiece;
-	//DWORD		dwPieceHashValue;
-	TCHAR		* szPieceFile;
 	CFastDIB	* pDib;
 };
 
@@ -34,14 +28,20 @@ struct PieceStruct
 // Draw helper chess board.
 class CChessBoard
 {
-	static CFastDIB		*m_pBoardDIB;
-	static CFastDIB		*m_pBackgroundDIB;
-	static CFastDIB		*m_pMoveRectDIB;
-	static PieceStruct	m_tPieceStructs[PIECE_NUM];
+	CFastDIB		*m_pBoardDIB;
+	CFastDIB		*m_pBackgroundDIB;
+	CFastDIB		*m_pMoveRectDIB;
+	PieceStruct	m_tPieceStructs[PIECE_NUM];
+
+	POINT	m_ptBoardOrigin;
+	SIZE	m_sizePiece;
+	SIZE	m_sizeSquare;
 
 public:
-	static BOOL LoadMedia();
-	static void ReleaseMedia();
+	BOOL LoadMedia();
+	void ReleaseMedia();
+	void GetBoardSize(SIZE * size);
+
 
 private:
 
@@ -95,5 +95,6 @@ public:
 
 	void DrawBoard(GAMEWINDOWINFO * gi);
 	void DrawPiece(char piece, int x, int y);
+	void DrawBoard(char * fen);
 
 };

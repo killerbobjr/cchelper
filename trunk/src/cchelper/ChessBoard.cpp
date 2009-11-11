@@ -6,145 +6,128 @@
 #include "ChessBoard.h"
 #include "AppEnv.h"
 #include "resource.h"
+#include <fstream>
+#include "Json/Json.h"
 
 using namespace base;
 
 // CChessBoard
 //___________________________________________________________________________
-CFastDIB * CChessBoard::m_pBoardDIB = NULL;
-CFastDIB * CChessBoard::m_pMoveRectDIB = NULL;
-CFastDIB * CChessBoard::m_pBackgroundDIB = NULL;
 
-//PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
-//	{ 'J', PIECEHV_RJ, MEDIAFILE(_T("CRJ.BMP")), 0 },
-//	{ 'M', PIECEHV_RM, MEDIAFILE(_T("CRM.BMP")), 0 },
-//	{ 'X', PIECEHV_RX, MEDIAFILE(_T("CRX.BMP")), 0 },
-//	{ 'S', PIECEHV_RS, MEDIAFILE(_T("CRS.BMP")), 0 },
-//	{ 'K', PIECEHV_RK, MEDIAFILE(_T("CRK.BMP")), 0 },
-//	{ 'P', PIECEHV_RP, MEDIAFILE(_T("CRP.BMP")), 0 },
-//	{ 'B', PIECEHV_RB, MEDIAFILE(_T("CRB.BMP")), 0 },
-//	{ 'j', PIECEHV_BJ, MEDIAFILE(_T("CBJ.BMP")), 0 },
-//	{ 'm', PIECEHV_BM, MEDIAFILE(_T("CBM.BMP")), 0 },
-//	{ 'x', PIECEHV_BX, MEDIAFILE(_T("CBX.BMP")), 0 },
-//	{ 's', PIECEHV_BS, MEDIAFILE(_T("CBS.BMP")), 0 },
-//	{ 'k', PIECEHV_BK, MEDIAFILE(_T("CBK.BMP")), 0 },
-//	{ 'p', PIECEHV_BP, MEDIAFILE(_T("CBP.BMP")), 0 },
-//	{ 'b', PIECEHV_BB, MEDIAFILE(_T("CBB.BMP")), 0 },
-//};
-
-#ifdef ENGINE_CCE
-
-
-PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
-	{ 'J',  _T("CRJ.BMP"), 0 },
-	{ 'M',  _T("CRM.BMP"), 0 },
-	{ 'X',  _T("CRX.BMP"), 0 },
-	{ 'S',  _T("CRS.BMP"), 0 },
-	{ 'K',  _T("CRK.BMP"), 0 },
-	{ 'P',  _T("CRP.BMP"), 0 },
-	{ 'B',  _T("CRB.BMP"), 0 },
-	{ 'j',  _T("CBJ.BMP"), 0 },
-	{ 'm',  _T("CBM.BMP"), 0 },
-	{ 'x',  _T("CBX.BMP"), 0 },
-	{ 's',  _T("CBS.BMP"), 0 },
-	{ 'k',  _T("CBK.BMP"), 0 },
-	{ 'p',  _T("CBP.BMP"), 0 },
-	{ 'b',  _T("CBB.BMP"), 0 },
-};
-
-
-#else
-
-PieceStruct CChessBoard::m_tPieceStructs[PIECE_NUM] = {
-	{ 'R',  _T("CRJ.BMP"), 0 },
-	{ 'N',  _T("CRM.BMP"), 0 },
-	{ 'B',  _T("CRX.BMP"), 0 },
-	{ 'A',  _T("CRS.BMP"), 0 },
-	{ 'K',  _T("CRK.BMP"), 0 },
-	{ 'C',  _T("CRP.BMP"), 0 },
-	{ 'P',  _T("CRB.BMP"), 0 },
-	{ 'r',  _T("CBJ.BMP"), 0 },
-	{ 'n',  _T("CBM.BMP"), 0 },
-	{ 'b',  _T("CBX.BMP"), 0 },
-	{ 'a',  _T("CBS.BMP"), 0 },
-	{ 'k',  _T("CBK.BMP"), 0 },
-	{ 'c',  _T("CBP.BMP"), 0 },
-	{ 'p',  _T("CBB.BMP"), 0 },
-};
-
-#endif
 CChessBoard::CChessBoard()
 {
 	m_pGameWindow = NULL;
 	m_pChessEngine = NULL;
+
+	m_pBoardDIB	= NULL;
+	m_pBackgroundDIB	= NULL;
+	m_pMoveRectDIB	= NULL;
+	memset(&m_tPieceStructs, 0, sizeof(PieceStruct) * PIECE_NUM);
 }
 
 CChessBoard::~CChessBoard()
 {
+	ReleaseMedia();
 }
 
+void CChessBoard::GetBoardSize(SIZE * size)
+{
+	assert(CChessBoard::m_pBoardDIB);
+
+	size->cx = CChessBoard::m_pBoardDIB->GetDibInfo()->m_bmWidth ;
+	size->cy = CChessBoard::m_pBoardDIB->GetDibInfo()->m_bmHeight;
+}
 
 BOOL CChessBoard::LoadMedia()
 {
-	int i;
-	HRESULT hr;
-
 	try
 	{
-		for ( i = 0; i < PIECE_NUM; i++ )
-		{
-			if ( !m_tPieceStructs[i].pDib )
-			{
-				m_tPieceStructs[i].pDib = new CFastDIB();
+		int i;
+		HRESULT hr;
 
-				hr = m_tPieceStructs[i].pDib->LoadFromFile(
-					AppEnv::GetMediaPath(m_tPieceStructs[i].szPieceFile));
-				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
-			}
-		}
+		Json::Value  vRoot;
 
-		if ( !m_pBoardDIB )
+		std::ifstream fs(AppEnv::GetMediaPath(_T("theme.ini"), AppEnv::szTheme));
+		if(fs)
 		{
-			m_pBoardDIB = new CFastDIB();
-			if ( m_pBoardDIB )
-			{
-				hr = m_pBoardDIB->LoadFromFile(
-					AppEnv::GetMediaPath(_T("CBOARD.BMP")));
-				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
-			}
-		}
+			Json::Reader reader;
+			reader.parse(fs, vRoot, false);
 
-		if ( !m_pBackgroundDIB )
-		{
-			m_pBackgroundDIB = new CFastDIB();
-			if( m_pBackgroundDIB )
-			{
-				hr = m_pBackgroundDIB->LoadFromFile(
-					AppEnv::szBackgoundBmp);
-				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
-			}
-		}
+			m_ptBoardOrigin.x = vRoot["BoardOringinX"].asInt();
+			m_ptBoardOrigin.y = vRoot["BoardOringinY"].asInt();
+			m_sizePiece.cx = vRoot["PieceWidth"].asUInt();
+			m_sizePiece.cy = vRoot["PieceHeight"].asUInt();
+			m_sizeSquare.cx = vRoot["SquareWidth"].asUInt();
+			m_sizeSquare.cy = vRoot["SquareHeight"].asUInt();
 
-		if( !m_pMoveRectDIB )
-		{
-			m_pMoveRectDIB = new CFastDIB();
-			if( m_pMoveRectDIB )
+			if ( !m_pBoardDIB )
 			{
-				hr = m_pMoveRectDIB->LoadFromFile(
-					AppEnv::GetMediaPath(_T("MOVERECT.BMP")));
-				THROW_CHECK(hr, CFastDIB::GetErrorString(hr));				
+				m_pBoardDIB = new CFastDIB();
+				if ( m_pBoardDIB )
+				{
+					hr = m_pBoardDIB->LoadFromFile(
+						AppEnv::GetMediaPath(vRoot["BoardBmp"].asString().c_str(),
+						AppEnv::szTheme)
+						);
+					THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
+				}
 			}
+
+			if ( !m_pBackgroundDIB )
+			{
+				m_pBackgroundDIB = new CFastDIB();
+				if( m_pBackgroundDIB )
+				{
+					hr = m_pBackgroundDIB->LoadFromFile(
+						AppEnv::GetMediaPath(vRoot["BackGroundBmp"].asString().c_str(),
+						AppEnv::szTheme)
+						);
+					THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
+				}
+			}
+
+			if( !m_pMoveRectDIB )
+			{
+				m_pMoveRectDIB = new CFastDIB();
+				if( m_pMoveRectDIB )
+				{
+					hr = m_pMoveRectDIB->LoadFromFile(
+						AppEnv::GetMediaPath(vRoot["MoveRectBmp"].asString().c_str(),
+						AppEnv::szTheme)
+						);
+					THROW_CHECK(hr, CFastDIB::GetErrorString(hr));				
+				}
+			}
+
+			Json::Value vPieceBmp = vRoot["PieceBmps"] ;
+
+			for ( i = 0; i < PIECE_NUM; i++ )
+			{
+				if ( !m_tPieceStructs[i].pDib )
+				{
+					m_tPieceStructs[i].pDib = new CFastDIB();
+					m_tPieceStructs[i].cPiece = vPieceBmp[i]["PieceKey"].asInt();
+
+					hr = m_tPieceStructs[i].pDib->LoadFromFile(
+						AppEnv::GetMediaPath(vPieceBmp[i]["PieceBmp"].asString().c_str(),
+						AppEnv::szTheme)
+						);
+					THROW_CHECK(hr, CFastDIB::GetErrorString(hr));
+				}
+			}
+
 		}
+		fs.close();
+		
+		return true;
 	}
-	catch(const char * e)
+	catch(std::exception& e)
 	{
-		base::Log(1,e);
-		CChessBoard::ReleaseMedia();
-		return FALSE;
+		base::Log(0, e.what() );
+		return false;
 	}
-
-	return TRUE;
 }
+
 
 void CChessBoard::ReleaseMedia()
 {
@@ -180,7 +163,9 @@ void CChessBoard::ReleaseMedia()
 
 void CChessBoard::DrawPiece( PieceStruct& ps, int squarex , int squarey )
 {
-	ps.pDib->Draw( g_pMainSurface, DRAWMODE_NORMAL, squarex * PIECE_DW, squarey * PIECE_DH );
+	POINT pt = GetSquareOrigin(squarex, squarey);
+
+	ps.pDib->Draw( g_pMainSurface, DRAWMODE_NORMAL, pt.x, pt.y );
 }
 
 void CChessBoard::DrawPiece(char piece, int x, int y)
@@ -197,8 +182,8 @@ void CChessBoard::DrawPiece(char piece, int x, int y)
 POINT CChessBoard::GetSquareOrigin(int squarex, int squarey )
 {
 	POINT pt;
-	pt.x = squarex * PIECE_DW;
-	pt.y = squarey * PIECE_DH;
+	pt.x = m_ptBoardOrigin.x + squarex * m_sizeSquare.cx;
+	pt.y = m_ptBoardOrigin.y + squarey * m_sizeSquare.cy;
 	return pt;
 }
 
@@ -317,11 +302,46 @@ void CChessBoard::Update()
 	} 
 	else if ( wp.showCmd == SW_SHOWMINIMIZED )
 	{
-		DrawBoard( NULL );
+		//DrawBoard( NULL );
 	}
 
 }
 
+
+void CChessBoard::DrawBoard(char * fen)
+{
+	assert( g_pMainSurface && m_pBoardDIB )	;
+
+	m_pBackgroundDIB->Draw(g_pMainSurface);
+	m_pBoardDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL);
+
+
+	char *lpFen = fen ;
+	int x = 0;
+	int y = 0;
+	char c;
+
+	c = *lpFen;
+
+	while( c && c != ' ')
+	{
+		if( c >= '0' && c <= '9' )
+		{
+			x = x + c - '0';
+		}
+		else if( c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') 
+		{
+			DrawPiece( c , x, y );
+			x = x + 1;
+		}else if( c == '/' )
+		{
+			x = 0;
+			y ++;
+		}
+
+		c= *(++lpFen);
+	}
+}
 
 void CChessBoard::DrawBoard(GAMEWINDOWINFO * gi)
 {

@@ -48,31 +48,6 @@ COLORREF * g_pBoardRectPic = NULL;	// for test
 
 //FUNCTIONS
 //___________________________________________________________________________
-void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
-{
-	RECT  rc;
-
-	// Ajust window size
-	SetRect( &rc, 0, 0, dwWidth, dwHeight );
-
-	AdjustWindowRectEx( &rc, GetWindowStyle(g_hWndMain), GetMenu(g_hWndMain) != NULL,
-						GetWindowExStyle(g_hWndMain) );
-
-	MoveWindow(g_hWndMain,
-		rc.left+(GetSystemMetrics(SM_CXSCREEN)-dwWidth)/2,
-		rc.top+(GetSystemMetrics(SM_CYSCREEN)-dwHeight)/2,
-		rc.right-rc.left,
-		rc.bottom-rc.top,
-		FALSE );
-
-	CFastDIB::Initialize(dwWidth, dwHeight);
-
-	g_pMainSurface = new CFastDIB();
-
-	g_pMainSurface->CreateDIB( dwWidth, dwHeight, FDIBTYPE_RGBA );
-
-}
-
 
 
 void AlreadyRun(void)
@@ -120,10 +95,7 @@ BOOL doInit(HINSTANCE hInstance, int nCmdShow)
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CCHELPER));
 
-	SetWindowSize(210, 235);
-
 	SetTimer( g_hWndMain, APPUPDATE_TIMER, APPUPDATE_TIMER_ELAPSE, 0 );
-
 
 	if(!InitApp())
 		return FALSE;

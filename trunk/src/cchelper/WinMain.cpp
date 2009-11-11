@@ -7,6 +7,7 @@
 #include "fastdib.h"
 #include "app.h"
 #include "appenv.h"
+#include <Ole2.h>
 #include <mmsystem.h>
 
 // STRUCTS
@@ -156,6 +157,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return 0;
 	}
 
+	OleInitialize(NULL);
+
 	if( !doInit(hInstance, nCmdShow) )
 		return -1;
 
@@ -179,6 +182,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
     }
 
+	OleUninitialize();
 
 	return (int) msg.wParam;
 }
@@ -239,7 +243,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CCHELPER));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= 0;
+	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_CCHELPER);
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));

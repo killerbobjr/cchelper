@@ -1,4 +1,4 @@
-
+#include "WebControl.h"
 #include "common.h"
 #include "fastdib.h"
 #include "app.h"
@@ -8,6 +8,7 @@
 #include "AppEnv.h"
 #include "ChessBoard.h"
 #include "resource.h"
+
 #include <mmsystem.h>
 
 using namespace base;
@@ -20,7 +21,7 @@ CQQNewChessWnd	* g_pQncWnd = NULL;
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
 BOOL			g_bAlarmFlage = FALSE;
-
+WebControl		* g_pWebControl = NULL;
 
 // GLOBAL FUNCTION
 //_____________________________________________________________________________
@@ -29,7 +30,7 @@ void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
 	RECT  rc;
 
 	// Ajust window size
-	SetRect( &rc, 0, 0, dwWidth, dwHeight );
+	SetRect( &rc, 0, 0, dwWidth, dwHeight + 100 );
 
 	AdjustWindowRectEx( &rc, GetWindowStyle(g_hWndMain), GetMenu(g_hWndMain) != NULL,
 						GetWindowExStyle(g_hWndMain) );
@@ -47,11 +48,24 @@ void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
 
 	g_pMainSurface->CreateDIB( dwWidth, dwHeight, FDIBTYPE_RGBA );
 
+	if( !g_pWebControl )
+	{
+		g_pWebControl = new WebControl();
+
+		GetClientRect(g_hWndMain, &rc);
+
+		rc.top = rc.top + dwHeight ;
+
+		g_pWebControl->CreateEmbeddedWebControl(g_hWndMain, rc);
+		//g_pWebControl->Nav(L"http://images.sohu.com/bill/s2009/shuowang/dianxin/4501051111.swf");
+	}
+
 }
 
 
 BOOL InitApp()
-{	
+{
+
 	if(!AppEnv::LoadEnv(_T("./cchelper.ini")))
 		return FALSE;
 
@@ -131,6 +145,8 @@ BOOL ExitApp()
 	if ( g_pQncWnd ) delete g_pQncWnd;
 
 	if ( g_pChessEngine) delete g_pChessEngine;
+
+	if ( g_pWebControl ) delete g_pWebControl;
 
 	return TRUE;
 }

@@ -207,7 +207,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\cchelper\WebControl.cpp"
+				RelativePath="..\..\src\cchelper\WebControl.c"
 				>
 			</File>
 			<File

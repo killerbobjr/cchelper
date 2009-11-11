@@ -215,11 +215,11 @@ void CChessBoard::ShowBestMove(CChessEngine::PieceMove * mv)
 		bShowSrcFocus = !bShowSrcFocus;
 		if( bShowSrcFocus )
 		{
-			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, ptSrc.x , ptSrc.y,0,0,0,0,255 ,1,0x00ff0000);
+			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, ptSrc.x , ptSrc.y);
 		} 
 		else
 		{
-			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, ptDst.x, ptDst.y,0,0,0,0,255 ,1,0x00ff0000);
+			m_pMoveRectDIB->Draw( g_pMainSurface, DRAWMODE_NORMAL, ptDst.x, ptDst.y);
 		}
 	}
 	

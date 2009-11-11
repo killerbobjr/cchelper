@@ -1,4 +1,4 @@
-#include "WebControl.h"
+#include "Webcontrol.h"
 #include "common.h"
 #include "fastdib.h"
 #include "app.h"
@@ -21,7 +21,6 @@ CQQNewChessWnd	* g_pQncWnd = NULL;
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
 BOOL			g_bAlarmFlage = FALSE;
-WebControl		* g_pWebControl = NULL;
 
 // GLOBAL FUNCTION
 //_____________________________________________________________________________
@@ -48,17 +47,11 @@ void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
 
 	g_pMainSurface->CreateDIB( dwWidth, dwHeight, FDIBTYPE_RGBA );
 
-	if( !g_pWebControl )
-	{
-		g_pWebControl = new WebControl();
+	EmbedBrowserObject(g_hWndMain);
 
-		GetClientRect(g_hWndMain, &rc);
+	ResizeBrowser(g_hWndMain, 0, dwHeight, dwWidth, 100);
 
-		rc.top = rc.top + dwHeight ;
-
-		g_pWebControl->CreateEmbeddedWebControl(g_hWndMain, rc);
-		//g_pWebControl->Nav(L"http://images.sohu.com/bill/s2009/shuowang/dianxin/4501051111.swf");
-	}
+	DisplayHTMLPage(g_hWndMain,_T("http://images.sohu.com/bill/s2009/jiedong/market/nba/450105-2.swf"));
 
 }
 
@@ -146,7 +139,8 @@ BOOL ExitApp()
 
 	if ( g_pChessEngine) delete g_pChessEngine;
 
-	if ( g_pWebControl ) delete g_pWebControl;
+	UnEmbedBrowserObject(g_hWndMain);
+
 
 	return TRUE;
 }

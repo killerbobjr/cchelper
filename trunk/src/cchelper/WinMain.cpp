@@ -87,7 +87,7 @@ BOOL doInit(HINSTANCE hInstance, int nCmdShow)
                           0,
                           CW_USEDEFAULT,
                           CW_USEDEFAULT,
-                          NULL,
+                          HWND_DESKTOP,
                           NULL,
                           hInstance,
                           NULL);

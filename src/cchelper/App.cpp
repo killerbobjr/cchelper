@@ -21,6 +21,35 @@ CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
 BOOL			g_bAlarmFlage = FALSE;
 
+
+// GLOBAL FUNCTION
+//_____________________________________________________________________________
+void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
+{
+	RECT  rc;
+
+	// Ajust window size
+	SetRect( &rc, 0, 0, dwWidth, dwHeight );
+
+	AdjustWindowRectEx( &rc, GetWindowStyle(g_hWndMain), GetMenu(g_hWndMain) != NULL,
+						GetWindowExStyle(g_hWndMain) );
+
+	MoveWindow(g_hWndMain,
+		rc.left+(GetSystemMetrics(SM_CXSCREEN)-dwWidth)/2,
+		rc.top+(GetSystemMetrics(SM_CYSCREEN)-dwHeight)/2,
+		rc.right-rc.left,
+		rc.bottom-rc.top,
+		FALSE );
+
+	CFastDIB::Initialize(dwWidth, dwHeight);
+
+	g_pMainSurface = new CFastDIB();
+
+	g_pMainSurface->CreateDIB( dwWidth, dwHeight, FDIBTYPE_RGBA );
+
+}
+
+
 BOOL InitApp()
 {	
 	if(!AppEnv::LoadEnv(_T("./cchelper.ini")))
@@ -30,10 +59,24 @@ BOOL InitApp()
 	else if(AppEnv::nThinkTime == 10)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC10, MF_CHECKED);
 	else if(AppEnv::nThinkTime == 30)	CheckMenuItem(GetMenu(g_hWndMain), IDM_SEC30, MF_CHECKED);
 
-	if( !CChessBoard::LoadMedia() )
+
+
+	g_pChessBoard = new CChessBoard();
+
+	g_pChessEngine = new CChessEngine();
+
+	g_pChessBoard->SetChessEngine( g_pChessEngine );
+
+	if( !g_pChessBoard->LoadMedia() )
 	{
 		return FALSE;
 	}
+
+	SIZE sizeBoard;
+
+	g_pChessBoard->GetBoardSize(&sizeBoard);
+
+	SetWindowSize(sizeBoard.cx ,sizeBoard.cy);
 
 	g_pQncWnd = new CQQNewChessWnd();
 
@@ -43,16 +86,7 @@ BOOL InitApp()
 	}
 
 
-	g_pChessBoard = new CChessBoard();
 
-	g_pChessEngine = new CChessEngine();
-
-	g_pChessBoard->SetChessEngine( g_pChessEngine );
-
-
-#ifdef ENGINE_CCE
-	g_pChessEngine->InitEngine("cce.exe");
-#else
 	if(g_pChessEngine->InitEngine(AppEnv::szEngine))
 	{
 		base::Log(0,"Load engine success");
@@ -62,7 +96,7 @@ BOOL InitApp()
 		base::Log(0,"Load engine failed");
 		return FALSE;
 	}
-#endif
+
 	assert(g_pChessEngine->IsLoaded() );
 	return TRUE;
 }
@@ -80,7 +114,7 @@ BOOL AppLoop()
 		{
 			g_pChessBoard->SetGameWindow(g_pQncWnd);
 		}
-		g_pChessBoard->DrawBoard( NULL );
+		g_pChessBoard->DrawBoard( "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1" );
 	} 
 	else
 	{
@@ -97,8 +131,6 @@ BOOL ExitApp()
 	if ( g_pQncWnd ) delete g_pQncWnd;
 
 	if ( g_pChessEngine) delete g_pChessEngine;
-
-	CChessBoard::ReleaseMedia();
 
 	return TRUE;
 }

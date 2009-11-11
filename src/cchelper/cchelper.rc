@@ -8,8 +8,8 @@
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 
-IDI_CCHELPER       ICON         "cchelper.ico"
-IDI_SMALL               ICON         "small.ico"
+IDI_CCHELPER       ICON         "facial_painting48.ico"
+IDI_SMALL          ICON         "facial_painting_16.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -60,54 +60,6 @@ void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
 
 }
 
-LRESULT CALLBACK GetMsgProc(int code,
-    WPARAM wParam,
-    LPARAM lParam
-)
-{
-	if(code < -1 )
-	{
-		return CallNextHookEx(g_hHookPlay, code, wParam, lParam);
-	}
-
-	MSG * pMsg = (MSG*)lParam;
-	switch(pMsg->message)
-	{
-	case WM_RBUTTONDOWN:
-	case WM_RBUTTONUP:
-	case WM_NCRBUTTONDOWN:
-	case WM_NCRBUTTONUP:
-	case WM_NCRBUTTONDBLCLK:
-		if(pMsg->hwnd != g_hWndMain)
-		{
-			OutputDebugString("Got a mouse message\n");
-			pMsg->hwnd = g_hWndMain;
-		}
-	}
-	return CallNextHookEx(g_hHookPlay, code, wParam, lParam);
-}
-
-LRESULT CALLBACK JournalPlaybackProc(int code,
-    WPARAM wParam,
-    LPARAM lParam
-)
-{
-	switch(code)
-	{
-	case HC_GETNEXT:
-		break;
-	case HC_NOREMOVE:
-		break;
-	case HC_SKIP:
-		break;
-	case HC_SYSMODALOFF:
-		break;
-	case HC_SYSMODALON:
-		break;
-	}
-	return CallNextHookEx(g_hHookPlay, code, wParam, lParam);
-}
-
 BOOL InitApp()
 {
 
@@ -157,15 +109,6 @@ BOOL InitApp()
 
 	assert(g_pChessEngine->IsLoaded() );
 
-	// hook mouse
-	//CMouseHook::StartHook( g_hWndMain );
-	
-	//g_hHookPlay = SetWindowsHookEx(WH_JOURNALPLAYBACK,
-	//	(HOOKPROC) JournalPlaybackProc, GetModuleHandle(NULL),0);
-
-
-	//g_hHookGetMessage= SetWindowsHookEx(WH_GETMESSAGE ,
-	//	(HOOKPROC) GetMsgProc, GetModuleHandle(NULL),0);
 
 	return TRUE;
 }
@@ -176,15 +119,19 @@ BOOL AppLoop()
 
 	pgw = g_pChessBoard->GetGameWindow();
 
-	HWND hwnd = g_pQncWnd->GetHandle();
 	if( !pgw )
 	{
 		if(g_pQncWnd->FindQQNewChessWindow())
 		{
 			g_pChessBoard->SetGameWindow(g_pQncWnd);
+			// hook mouse
+			CMouseHook::StartHook( g_pQncWnd->GetFrameWindowHandle() );
+		} else
+		{
+			CMouseHook::StopHook();
 		}
 		g_pChessBoard->DrawBoard( "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1" );
-	} 
+	}
 	else
 	{
 		g_pChessBoard->Update();
@@ -203,13 +150,7 @@ BOOL ExitApp()
 
 	UnEmbedBrowserObject(g_hWndMain);
 
-	//CMouseHook::StopHook();
-	//if(g_hHookPlay)
-	//	UnhookWindowsHookEx(g_hHookPlay);
-	//if(g_hHookGetMessage)
-	//{
-	//	assert(UnhookWindowsHookEx(g_hHookGetMessage));
-	//}
+
 	return TRUE;
 }
 

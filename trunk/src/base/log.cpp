@@ -4,7 +4,10 @@
 
 #pragma warning(disable : 4996)
 
+#pragma data_seg("TWH.ShareData")
 unsigned int dwBugFileFlag = 0;
+#pragma data_seg()
+#pragma comment(linker, "/section:TWH.ShareData,rws")
 
 namespace base 
 {

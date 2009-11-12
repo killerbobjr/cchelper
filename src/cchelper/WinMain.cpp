@@ -113,6 +113,8 @@ BOOL doUpdate()
 {
 	HDC hdc = GetDC(g_hWndMain);
 
+	KillTimer( g_hWndMain, APPUPDATE_TIMER);
+
 	if ( g_pMainSurface && hdc )
 	{
 		g_pMainSurface->FastBlt(hdc);

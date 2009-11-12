@@ -8,6 +8,7 @@
 #include "AppEnv.h"
 #include "ChessBoard.h"
 #include "resource.h"
+#include "mousehook.h"
 
 #include <mmsystem.h>
 
@@ -21,15 +22,18 @@ CQQNewChessWnd	* g_pQncWnd = NULL;
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
 BOOL			g_bAlarmFlage = FALSE;
+HHOOK			g_hHookPlay = NULL;
+HHOOK			g_hHookGetMessage = NULL;
 
 // GLOBAL FUNCTION
 //_____________________________________________________________________________
 void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
 {
 	RECT  rc;
+	int nAdvertisementHeight = 40;
 
 	// Ajust window size
-	SetRect( &rc, 0, 0, dwWidth, dwHeight + 100 );
+	SetRect( &rc, 0, 0, dwWidth, dwHeight + nAdvertisementHeight );
 
 	AdjustWindowRectEx( &rc, GetWindowStyle(g_hWndMain), GetMenu(g_hWndMain) != NULL,
 						GetWindowExStyle(g_hWndMain) );
@@ -49,12 +53,60 @@ void SetWindowSize(DWORD dwWidth,DWORD dwHeight)
 
 	EmbedBrowserObject(g_hWndMain);
 
-	ResizeBrowser(g_hWndMain, 0, dwHeight, dwWidth, 100);
+	
+	ResizeBrowser(g_hWndMain, 0, dwHeight, dwWidth, nAdvertisementHeight);
 
 	DisplayHTMLPage(g_hWndMain,_T("http://images.sohu.com/bill/s2009/jiedong/market/nba/450105-2.swf"));
 
 }
 
+LRESULT CALLBACK GetMsgProc(int code,
+    WPARAM wParam,
+    LPARAM lParam
+)
+{
+	if(code < -1 )
+	{
+		return CallNextHookEx(g_hHookPlay, code, wParam, lParam);
+	}
+
+	MSG * pMsg = (MSG*)lParam;
+	switch(pMsg->message)
+	{
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+	case WM_NCRBUTTONDOWN:
+	case WM_NCRBUTTONUP:
+	case WM_NCRBUTTONDBLCLK:
+		if(pMsg->hwnd != g_hWndMain)
+		{
+			OutputDebugString("Got a mouse message\n");
+			pMsg->hwnd = g_hWndMain;
+		}
+	}
+	return CallNextHookEx(g_hHookPlay, code, wParam, lParam);
+}
+
+LRESULT CALLBACK JournalPlaybackProc(int code,
+    WPARAM wParam,
+    LPARAM lParam
+)
+{
+	switch(code)
+	{
+	case HC_GETNEXT:
+		break;
+	case HC_NOREMOVE:
+		break;
+	case HC_SKIP:
+		break;
+	case HC_SYSMODALOFF:
+		break;
+	case HC_SYSMODALON:
+		break;
+	}
+	return CallNextHookEx(g_hHookPlay, code, wParam, lParam);
+}
 
 BOOL InitApp()
 {
@@ -93,7 +145,6 @@ BOOL InitApp()
 	}
 
 
-
 	if(g_pChessEngine->InitEngine(AppEnv::szEngine))
 	{
 		base::Log(0,"Load engine success");
@@ -105,6 +156,17 @@ BOOL InitApp()
 	}
 
 	assert(g_pChessEngine->IsLoaded() );
+
+	// hook mouse
+	//CMouseHook::StartHook( g_hWndMain );
+	
+	//g_hHookPlay = SetWindowsHookEx(WH_JOURNALPLAYBACK,
+	//	(HOOKPROC) JournalPlaybackProc, GetModuleHandle(NULL),0);
+
+
+	//g_hHookGetMessage= SetWindowsHookEx(WH_GETMESSAGE ,
+	//	(HOOKPROC) GetMsgProc, GetModuleHandle(NULL),0);
+
 	return TRUE;
 }
 
@@ -141,7 +203,13 @@ BOOL ExitApp()
 
 	UnEmbedBrowserObject(g_hWndMain);
 
-
+	//CMouseHook::StopHook();
+	//if(g_hHookPlay)
+	//	UnhookWindowsHookEx(g_hHookPlay);
+	//if(g_hHookGetMessage)
+	//{
+	//	assert(UnhookWindowsHookEx(g_hHookGetMessage));
+	//}
 	return TRUE;
 }
 

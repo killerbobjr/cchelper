@@ -113,7 +113,6 @@ BOOL doUpdate()
 {
 	HDC hdc = GetDC(g_hWndMain);
 
-	KillTimer( g_hWndMain, APPUPDATE_TIMER);
 
 	if ( g_pMainSurface && hdc )
 	{
@@ -127,6 +126,8 @@ BOOL doUpdate()
 BOOL doRelease()
 {
 	g_intAppRunning = FALSE;
+	
+	KillTimer( g_hWndMain, APPUPDATE_TIMER);
 
 	if ( g_pMainSurface ) 
 	{

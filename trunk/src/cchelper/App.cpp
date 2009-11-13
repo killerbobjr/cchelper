@@ -107,6 +107,8 @@ BOOL InitApp()
 		return FALSE;
 	}
 
+	CMouseHook::StartHook(g_hWndMain);
+
 	assert(g_pChessEngine->IsLoaded() );
 
 
@@ -125,10 +127,10 @@ BOOL AppLoop()
 		{
 			g_pChessBoard->SetGameWindow(g_pQncWnd);
 			// hook mouse
-			CMouseHook::StartHook( g_pQncWnd->GetFrameWindowHandle() );
+			//CMouseHook::StartHook( g_pQncWnd->GetFrameWindowHandle() );
 		} else
 		{
-			CMouseHook::StopHook();
+			//CMouseHook::StopHook();
 		}
 		g_pChessBoard->DrawBoard( "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1" );
 	}
@@ -150,6 +152,7 @@ BOOL ExitApp()
 
 	UnEmbedBrowserObject(g_hWndMain);
 
+	CMouseHook::StopHook();
 
 	return TRUE;
 }

@@ -206,6 +206,13 @@ namespace Json {
       ~Value();
 
       Value &operator=( const Value &other );
+	  Value &operator=( int other) ;
+      Value &operator=( UInt other) ;
+      Value &operator=( double other) ;
+      Value &operator=( const char * other ) ;
+      Value &operator=( const StaticString &other ) ;
+      Value &operator=( const std::string& other ) ;
+
       /// Swap values.
       /// \note Currently, comments are intentionally not swapped, for
       /// both logic and efficiency.

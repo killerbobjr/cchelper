@@ -98,4 +98,5 @@ public:
 	//_________________________________________________________________________________________
 	virtual HWND GetFrameWindowHandle() = 0;
 
+	virtual bool SaveHashValue(TCHAR * szFile, TCHAR * szBmp){ return true;};
 };

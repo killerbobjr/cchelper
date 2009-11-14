@@ -7,6 +7,9 @@ using namespace System::Windows::Forms;
 using namespace System::Data;
 using namespace System::Drawing;
 
+extern "C" {
+	void Capture3D(HWND hWnd, LPCSTR szFileName);
+};
 
 namespace genkeytool {
 
@@ -23,10 +26,11 @@ namespace genkeytool {
 	{
 	private:
 		HWND		m_hWnd;
-		
+
 	private: System::Windows::Forms::Button^  btnRun;
 	private: System::Windows::Forms::Timer^  timer1;
-	private: System::Windows::Forms::Label^  label16;
+	private: System::Windows::Forms::Label^  lblDragDrop;
+
 			 PWINDOWINFO m_pWindowInfo;
 	public:
 		frmMain(void)
@@ -123,6 +127,7 @@ namespace genkeytool {
 			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->txtRectWidth = (gcnew System::Windows::Forms::TextBox());
 			this->groupBox1 = (gcnew System::Windows::Forms::GroupBox());
+			this->lblDragDrop = (gcnew System::Windows::Forms::Label());
 			this->btnRun = (gcnew System::Windows::Forms::Button());
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			this->label15 = (gcnew System::Windows::Forms::Label());
@@ -145,7 +150,6 @@ namespace genkeytool {
 			this->label14 = (gcnew System::Windows::Forms::Label());
 			this->bgwMouseReader = (gcnew System::ComponentModel::BackgroundWorker());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
-			this->label16 = (gcnew System::Windows::Forms::Label());
 			this->groupBox1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->BeginInit();
 			this->groupBox2->SuspendLayout();
@@ -238,7 +242,7 @@ namespace genkeytool {
 			// 
 			// groupBox1
 			// 
-			this->groupBox1->Controls->Add(this->label16);
+			this->groupBox1->Controls->Add(this->lblDragDrop);
 			this->groupBox1->Controls->Add(this->btnRun);
 			this->groupBox1->Controls->Add(this->pictureBox1);
 			this->groupBox1->Controls->Add(this->label15);
@@ -266,6 +270,16 @@ namespace genkeytool {
 			this->groupBox1->TabIndex = 2;
 			this->groupBox1->TabStop = false;
 			this->groupBox1->Text = L"Rectangle && Sample Information";
+			// 
+			// lblDragDrop
+			// 
+			this->lblDragDrop->AllowDrop = true;
+			this->lblDragDrop->AutoSize = true;
+			this->lblDragDrop->Location = System::Drawing::Point(18, 155);
+			this->lblDragDrop->Name = L"lblDragDrop";
+			this->lblDragDrop->Size = System::Drawing::Size(19, 12);
+			this->lblDragDrop->TabIndex = 4;
+			this->lblDragDrop->Text = L"[+]";
 			// 
 			// btnRun
 			// 
@@ -446,17 +460,8 @@ namespace genkeytool {
 			// timer1
 			// 
 			this->timer1->Enabled = true;
+			this->timer1->Interval = 1000;
 			this->timer1->Tick += gcnew System::EventHandler(this, &frmMain::timer1_Tick);
-			// 
-			// label16
-			// 
-			this->label16->AutoSize = true;
-			this->label16->Location = System::Drawing::Point(18, 155);
-			this->label16->Name = L"label16";
-			this->label16->Size = System::Drawing::Size(19, 12);
-			this->label16->TabIndex = 4;
-			this->label16->Text = L"[+]";
-			this->label16->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &frmMain::label16_MouseDown);
 			// 
 			// frmMain
 			// 
@@ -470,9 +475,8 @@ namespace genkeytool {
 			this->Text = L"genkeytool";
 			this->TopMost = true;
 			this->Load += gcnew System::EventHandler(this, &frmMain::frmMain_Load);
-			this->DragLeave += gcnew System::EventHandler(this, &frmMain::frmMain_DragLeave);
-			this->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &frmMain::frmMain_DragDrop);
-			this->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &frmMain::frmMain_DragEnter);
+			this->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &frmMain::frmMain_KeyUp);
+			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &frmMain::frmMain_KeyDown);
 			this->groupBox1->ResumeLayout(false);
 			this->groupBox1->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->EndInit();
@@ -483,90 +487,84 @@ namespace genkeytool {
 		}
 #pragma endregion
 
-private: System::Void frmMain_Load(System::Object^  sender, System::EventArgs^  e) {
-			 this->txtRectWidth->Text = "50";
-			 this->txtRectHeight->Text = "50";
-			 this->txtSampleOriginX->Text = "0";
-			 this->txtSampleOriginY->Text = "0";
-			 this->txtSampleLenght->Text = "20";
-			 this->m_hWnd = 0;
-			 this->m_pWindowInfo = 0;
-		 }
+	private: System::Void frmMain_Load(System::Object^  sender, System::EventArgs^  e) {
+				 this->txtRectWidth->Text = "50";
+				 this->txtRectHeight->Text = "50";
+				 this->txtSampleOriginX->Text = "0";
+				 this->txtSampleOriginY->Text = "0";
+				 this->txtSampleLenght->Text = "20";
+				 this->m_hWnd = 0;
+				 this->m_pWindowInfo = 0;
+			 }
 
-private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
-
-			 if( this->m_hWnd )
-			 {
+	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
 				 POINT pt;
-				 
+
 				 GetCursorPos(&pt);
+
+				 WINDOWINFO wi;
+
+				 m_hWnd = WindowFromPoint(pt);
+
+				 GetWindowInfo(m_hWnd, &wi);
+				 m_pWindowInfo = &wi;
 
 				 RECT rt;
 
 				 GetWindowRect(m_hWnd, &rt);
 
-				 pt.x -= rt.left ;
-				 pt.y -= rt.top ;
-
-				 HDC hdc;
-				 hdc = GetDC(m_hWnd);
-
-				 HDC hdcTarget = (HDC) GetDC((HWND)this->pictureBox1->Handle.ToInt32()) ;
-	
-				 COLORREF color;
-
-				 int i, j;
-				 int h, w;
-
-				 h = Convert::ToInt32(txtRectHeight->Text);
-				 w = Convert::ToInt32(txtRectWidth->Text);
-			 
-				 for(j = 0; j < h ; j ++)
+				 if( m_hWnd )
 				 {
-					 for( i = 0; i < w; i++)
+					 POINT pt;
+
+					 GetCursorPos(&pt);
+
+					 RECT rt;
+
+					 GetWindowRect(m_hWnd, &rt);
+
+					 pt.x -= rt.left ;
+					 pt.y -= rt.top ;
+
+					 HDC hdc;
+					 hdc = GetDC(m_hWnd);
+
+					 HDC hdcTarget = (HDC) GetDC((HWND)this->pictureBox1->Handle.ToInt32()) ;
+
+					 COLORREF color;
+
+					 int i, j;
+					 int h, w;
+
+					 h = Convert::ToInt32(txtRectHeight->Text);
+					 w = Convert::ToInt32(txtRectWidth->Text);
+
+					 for(j = 0; j < h ; j ++)
 					 {
-						 color = GetPixel(hdc, pt.x + i,pt.y + j);
-						 SetPixel(hdcTarget,  i,  j, color);
+						 for( i = 0; i < w; i++)
+						 {
+							 color = GetPixel(hdc, pt.x + i,pt.y + j);
+							 SetPixel(hdcTarget,  i,  j, color);
+						 }
 					 }
+
+					 ReleaseDC(m_hWnd, hdc);
+					 ReleaseDC((HWND)this->pictureBox1->Handle.ToInt32(), hdcTarget);
+
+					 this->txtHandle->Text = String::Format("{0}", (unsigned int)m_hWnd);
+					 this->txtRectTop->Text = String::Format("{0}",pt.x) ;
+					 this->txtRectLeft->Text = String::Format("{0}",pt.y) ;
+					Capture3D(m_hWnd, "szFileName.bmp");
 				 }
 
-				 ReleaseDC(m_hWnd, hdc);
-				 ReleaseDC((HWND)this->pictureBox1->Handle.ToInt32(), hdcTarget);
-
-				 this->txtHandle->Text = String::Format("{0}", (unsigned int)m_hWnd);
-				 this->txtRectTop->Text = String::Format("{0}",pt.x) ;
-				 this->txtRectLeft->Text = String::Format("{0}",pt.y) ;
 			 }
-
-		 }
-private: System::Void frmMain_DragLeave(System::Object^  sender, System::EventArgs^  e) {
-			 this->Cursor = System::Windows::Forms::Cursors::Hand  ;
-		 }
-private: System::Void frmMain_DragDrop(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
-				 
-			 POINT pt;
-			 pt.x = e->X;
-			 pt.y = e->Y;
-			 
-			 WINDOWINFO wi;
-
-			 m_hWnd = WindowFromPoint(pt);
-			 GetWindowInfo(m_hWnd, &wi);
-			 m_pWindowInfo = &wi;
-
-			 RECT rt;
-
-			 GetWindowRect(m_hWnd, &rt);
-
-			 this->Cursor = System::Windows::Forms::Cursors::Default ;
-
-		 }
-private: System::Void frmMain_DragEnter(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
-			 this->Cursor = System::Windows::Forms::Cursors::Cross;
-		 }
-private: System::Void label16_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
-			// DoDragDrop(0,DragDropEffects.Copy);
-
+	private: System::Void frmMain_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+					 if( m_hWnd )
+					Capture3D(m_hWnd, "szFileName.bmp");
+			 }
+private: System::Void frmMain_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+					 if( m_hWnd )
+					Capture3D(m_hWnd, "szFileName.bmp");
 		 }
 };
 }

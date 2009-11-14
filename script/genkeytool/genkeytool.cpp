@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "frmMain.h"
+#include "frmGetKey.h"
 
 using namespace genkeytool;
 
@@ -13,6 +14,6 @@ int main(array<System::String ^> ^args)
 	Application::SetCompatibleTextRenderingDefault(false); 
 
 	// Create the main window and run it
-	Application::Run(gcnew frmMain());
+	Application::Run(gcnew frmGetKey());
 	return 0;
 }

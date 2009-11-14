@@ -16,6 +16,7 @@
 
 #include "log.h"
 #include "fastdib.h"
+#include "BitmapEx.h"
 #include "ChessEngine.h"
 // DEFINES
 //___________________________________________________________________________
@@ -34,6 +35,7 @@ extern BOOL			g_bActive;
 extern HWND			g_hWndMain;
 extern BOOL			g_bInitialized;
 extern CFastDIB		*g_pMainSurface;
+extern CBitmapEx	*g_pMainSurfaceBitmapEx;
 extern CChessEngine	* g_pChessEngine;
 // FUNCTIONS
 //___________________________________________________________________________

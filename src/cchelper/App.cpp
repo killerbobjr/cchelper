@@ -17,7 +17,6 @@ using namespace base;
 
 // GLOBAL VALUES
 //___________________________________________________________________________
-IGameWindow		* g_pGameWnd = NULL;
 CQQNewChessWnd	* g_pQncWnd = NULL;
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
@@ -107,7 +106,7 @@ BOOL InitApp()
 		return FALSE;
 	}
 
-	CMouseHook::StartHook(g_hWndMain);
+	//CMouseHook::StartHook(g_hWndMain);
 
 	assert(g_pChessEngine->IsLoaded() );
 
@@ -152,7 +151,7 @@ BOOL ExitApp()
 
 	UnEmbedBrowserObject(g_hWndMain);
 
-	CMouseHook::StopHook();
+	//CMouseHook::StopHook();
 
 	return TRUE;
 }

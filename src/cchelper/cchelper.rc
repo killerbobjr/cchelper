@@ -20,6 +20,7 @@ IDC_CCHELPER MENU
 BEGIN
     POPUP "&File"
     BEGIN
+		MENUITEM "&Capture"				IDM_CAPTURE
         MENUITEM "E&xit",                IDM_EXIT
     END
     POPUP "&Play"

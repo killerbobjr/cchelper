@@ -12,7 +12,7 @@
 #define IDM_SEC5		107
 #define IDM_SEC10		108
 #define IDM_SEC30		109
-
+#define IDM_CAPTURE		110
 
 #define IDI_CCHELPER			107
 #define IDI_SMALL				108

@@ -19,7 +19,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="../../bin/$(ConfigurationName)"
-			IntermediateDirectory="../../obj/$(ConfigurationName)"
+			IntermediateDirectory="../../obj/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			>
@@ -92,7 +92,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../bin/$(ConfigurationName)"
-			IntermediateDirectory="../../obj/$(ConfigurationName)"
+			IntermediateDirectory="../../obj/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\fastdib\BitmapEx.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\cchelper\ChessBoard.cpp"
 				>
 			</File>
@@ -196,6 +200,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\base\log.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\base\MurmurHash.cpp"
 				>
 			</File>
 			<File
@@ -225,6 +233,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\BitmapEx.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\cchelper\ChessBoard.h"
 				>
 			</File>
@@ -246,6 +258,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\log.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\MurmurHash.h"
 				>
 			</File>
 			<File

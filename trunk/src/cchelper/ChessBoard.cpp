@@ -227,20 +227,24 @@ void CChessBoard::ShowBestMove(CChessEngine::PieceMove * mv)
 
 void CChessBoard::Update()
 {
-	assert( GetGameWindow() && GetChessEngine() );
+	assert( GetChessEngine() );
 
 	GetChessEngine()->UpdateState();
 
+	IGameWindow * pGameWindow = GetGameWindow();
+
+	if( !pGameWindow ) return;
+
 	GAMEWINDOWINFO gi ;
 	WINDOWPLACEMENT wp;
-	GetWindowPlacement( GetGameWindow()->GetFrameWindowHandle(),&wp);
+	GetWindowPlacement( pGameWindow->GetFrameWindowHandle(),&wp);
 
 	if (wp.showCmd == SW_SHOWNORMAL)
 	{
 		memset( &gi, 0, sizeof(gi));
-		if( GetGameWindow()->ReadGameWindowInfo() )
+		if(pGameWindow->ReadGameWindowInfo() )
 		{
-			gi = GetGameWindow()->GetGameWindowInfo();
+			gi = pGameWindow->GetGameWindowInfo();
 			if( gi.bAvailible && !gi.bGameOver )
 			{
 				DrawBoard( &gi );
@@ -298,11 +302,11 @@ void CChessBoard::Update()
 					}
 				}
 			}
-		}
+		} else SetWindowText(g_hWndMain, _T("cchelper"));
 	} 
 	else if ( wp.showCmd == SW_SHOWMINIMIZED )
 	{
-		//DrawBoard( NULL );
+		SetWindowText(g_hWndMain, _T("Don't minimized..."));
 	}
 
 }

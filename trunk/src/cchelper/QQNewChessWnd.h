@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IGameWindow.h"
-
+class CBitmapEx;
 
 enum QncDlgItemEnum
 {
@@ -41,8 +41,17 @@ class CQQNewChessWnd : public IGameWindow
 
 	char m_fen[256];
 
+	CBitmapEx * m_pBmpGameWindow;
+
 
 private:
+
+	int TURN1_X;
+	int TURN1_Y;
+	int TURN2_X;
+	int TURN2_Y;
+	int TURN_WHITE_KEY;
+	int TURN_BLACK_KEY;
 
 	POINT m_ptBoardOrigin;
 	SIZE  m_sizeSquare;
@@ -77,7 +86,7 @@ public:
 
 	void DumpBoradHash();
 
-	bool SaveHashValue(TCHAR * szFile);
+	bool SaveHashValue(TCHAR * szFile, TCHAR * szBmp);
 	bool LoadHashValue(TCHAR * szFile);
 
 	virtual bool ReadGameWindowInfo() ;

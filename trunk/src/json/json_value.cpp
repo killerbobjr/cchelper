@@ -497,6 +497,50 @@ Value::operator=( const Value &other )
    return *this;
 }
 
+Value &
+Value::operator=( int other) 
+{
+   Value temp( other );
+   swap( temp );
+   return *this;
+}
+
+Value &
+Value::operator=( UInt other) {
+   Value temp( other );
+   swap( temp );
+   return *this;
+}
+
+Value &
+Value::operator=( double other) {
+   Value temp( other );
+   swap( temp );
+   return *this;
+}
+
+Value &
+Value::operator=( const char * other ) {
+   Value temp( other );
+   swap( temp );
+   return *this;
+}
+
+Value &
+Value::operator=( const StaticString &other ) {
+   Value temp( other );
+   swap( temp );
+   return *this;
+}
+
+Value &
+Value::operator=( const std::string& other ) {
+   Value temp( other );
+   swap( temp );
+   return *this;
+}
+
+
 void 
 Value::swap( Value &other )
 {

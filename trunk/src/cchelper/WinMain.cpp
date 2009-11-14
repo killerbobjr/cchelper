@@ -2,7 +2,7 @@
 //
 #include "common.h"
 #include "Resource.h"
-#include "QQNewChessWnd.h"
+#include "ChessBoard.h"
 #include "ChessEngine.h"
 #include "fastdib.h"
 #include "app.h"
@@ -114,9 +114,10 @@ BOOL doUpdate()
 	HDC hdc = GetDC(g_hWndMain);
 
 
-	if ( g_pMainSurface && hdc )
+	if ( hdc )
 	{
-		g_pMainSurface->FastBlt(hdc);
+		if ( g_pMainSurface )
+			g_pMainSurface->FastBlt(hdc);
 
 		ReleaseDC(g_hWndMain, hdc);
 	}
@@ -254,17 +255,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	return RegisterClassEx(&wcex);
 }
 
-void 	DrawBoardRectPic(HDC hdc)
-{
-	if ( g_pBoardRectPic )
-	{
-		for( int i =0; i < 58; i ++ )
-			for ( int j = 0; j < 58 ; j ++ )
-			{
-				SetPixel(hdc, 100 + i, 200 + j , g_pBoardRectPic[j * 58 + i]);
-			}
-	}
-}
+
 
 LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -285,6 +276,10 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		// Parse the menu selections:
 		switch (wmId)
 		{
+		case IDM_CAPTURE:
+			if( g_pChessBoard  && g_pChessBoard->GetGameWindow() )
+				g_pChessBoard->GetGameWindow()->SaveHashValue(_T("capture.ini"),_T("capture1.bmp"));
+			break;
 		case IDM_ABOUT:
 			//test();
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), g_hWndMain, About);

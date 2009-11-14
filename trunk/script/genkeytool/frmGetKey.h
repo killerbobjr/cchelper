@@ -145,7 +145,6 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(frmGetKey::typeid));
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->btnShowRect = (gcnew System::Windows::Forms::Button());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
@@ -457,7 +456,6 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			// picCaptureBmp
 			// 
 			this->picCaptureBmp->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->picCaptureBmp->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"picCaptureBmp.Image")));
 			this->picCaptureBmp->Location = System::Drawing::Point(0, 0);
 			this->picCaptureBmp->Name = L"picCaptureBmp";
 			this->picCaptureBmp->Size = System::Drawing::Size(414, 456);

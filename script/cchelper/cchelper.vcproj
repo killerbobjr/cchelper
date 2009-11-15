@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\cchelper\CGChessWnd.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\cchelper\ChessBoard.cpp"
 				>
 			</File>
@@ -196,6 +200,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\fastdib\FastDIB.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\cchelper\IGameWindow.cpp"
 				>
 			</File>
 			<File
@@ -234,6 +242,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\BitmapEx.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\cchelper\CGChessWnd.h"
 				>
 			</File>
 			<File

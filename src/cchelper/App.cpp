@@ -4,6 +4,7 @@
 #include "app.h"
 #include "IGameWindow.h"
 #include "QQNewChessWnd.h"
+#include "CGChessWnd.h"
 #include "ChessEngine.h"
 #include "AppEnv.h"
 #include "ChessBoard.h"
@@ -17,7 +18,7 @@ using namespace base;
 
 // GLOBAL VALUES
 //___________________________________________________________________________
-CQQNewChessWnd	* g_pQncWnd = NULL;
+
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
 BOOL			g_bAlarmFlage = FALSE;
@@ -88,12 +89,26 @@ BOOL InitApp()
 
 	SetWindowSize(sizeBoard.cx ,sizeBoard.cy);
 
-	g_pQncWnd = new CQQNewChessWnd();
+	// add qq new chess window
+	IGameWindow * pGameWnd = new CQQNewChessWnd();
 
-	if(!g_pQncWnd->LoadHashValue(_T("hv_qq.ini")))
+	if(!pGameWnd->LoadHashValue(_T("hv_qq.ini")))
 	{
 		return FALSE;
 	}
+
+	IGameWindow::AddGameWindow(pGameWnd);
+
+
+	// add china game chess window
+	pGameWnd = new CGChessWnd();
+
+	if(!pGameWnd->LoadHashValue(_T("hv_cg.ini")))
+	{
+		return FALSE;
+	}
+
+	IGameWindow::AddGameWindow(pGameWnd);
 
 
 	if(g_pChessEngine->InitEngine(AppEnv::szEngine))
@@ -122,15 +137,11 @@ BOOL AppLoop()
 
 	if( !pgw )
 	{
-		if(g_pQncWnd->FindQQNewChessWindow())
+		pgw = IGameWindow::SearchGameWindow();
+		if( pgw )
 		{
-			g_pChessBoard->SetGameWindow(g_pQncWnd);
-			// hook mouse
-			//CMouseHook::StartHook( g_pQncWnd->GetFrameWindowHandle() );
-		} else
-		{
-			//CMouseHook::StopHook();
-		}
+			g_pChessBoard->SetGameWindow(pgw);
+		} 
 		g_pChessBoard->DrawBoard( "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1" );
 	}
 	else
@@ -145,13 +156,11 @@ BOOL ExitApp()
 {
 	if( g_pChessBoard ) delete g_pChessBoard;
 
-	if ( g_pQncWnd ) delete g_pQncWnd;
+	IGameWindow::ReleaseAllGameWindow();
 
 	if ( g_pChessEngine) delete g_pChessEngine;
 
 	UnEmbedBrowserObject(g_hWndMain);
-
-	//CMouseHook::StopHook();
 
 	return TRUE;
 }

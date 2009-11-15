@@ -277,8 +277,6 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		switch (wmId)
 		{
 		case IDM_CAPTURE:
-			if( g_pChessBoard  && g_pChessBoard->GetGameWindow() )
-				g_pChessBoard->GetGameWindow()->SaveHashValue(_T("capture.ini"),_T("capture1.bmp"));
 			break;
 		case IDM_ABOUT:
 			//test();

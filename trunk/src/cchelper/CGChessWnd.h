@@ -3,8 +3,11 @@
 #include "IGameWindow.h"
 class CBitmapEx;
 
+#pragma comment(lib, "d3d9.lib")
+#pragma comment(lib, "d3dx9.lib")
 
-class CQQNewChessWnd : public IGameWindow
+
+class CGChessWnd : public IGameWindow
 {
 public :
 	enum QncDlgItemEnum
@@ -48,6 +51,8 @@ protected:
 
 private:
 
+	BOOL m_bAttachFound;
+
 	int TURN1_X;
 	int TURN1_Y;
 	int TURN2_X;
@@ -69,6 +74,8 @@ private:
 	}
 
 private:
+	void CGChessWnd::GetBmpFromD3D(HWND hwnd);
+	void CGChessWnd::GetBmpFromGDI(HWND hwnd);
 
 	bool ReadTurn(GAMEWINDOWINFO * pgi);
 	bool ReadFen(GAMEWINDOWINFO * pgi);
@@ -77,10 +84,10 @@ private:
 	virtual DWORD GetHashValue( int squarex, int squarey );
 
 public:
-	CQQNewChessWnd(void);
-	~CQQNewChessWnd(void);
+	CGChessWnd(void);
+	~CGChessWnd(void);
 
-	COLORREF * CQQNewChessWnd::GetRectData(int x, int y);
+	COLORREF * CGChessWnd::GetRectData(int x, int y);
 
 	bool Attach(HWND hwnd);
 
@@ -105,10 +112,10 @@ public:
 	virtual HWND GetFrameWindowHandle() { return m_hwndFrame; }
 
 	virtual HWND FindGameWindow();
-	DWORD CQQNewChessWnd::GetHashValue( int x, int y, int len );
+	DWORD CGChessWnd::GetHashValue( int x, int y, int len );
 
 
-	friend BOOL CALLBACK QQNewChessWnd_EnumChildProc( HWND hwnd,  LPARAM lParam);
+	friend BOOL CALLBACK CGChessWnd_EnumChildProc( HWND hwnd,  LPARAM lParam);
 
 };
 

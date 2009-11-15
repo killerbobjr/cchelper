@@ -7,7 +7,7 @@ using namespace System::Windows::Forms;
 using namespace System::Data;
 using namespace System::Drawing;
 
-
+#include <windows.h>
 #include "StringConvertor.h"
 #include "BitmapEx.h"
 #include "Murmurhash.h"
@@ -15,6 +15,10 @@ using namespace System::Drawing;
 #include <fstream>
 #include "Json/Json.h"
 #include "MurmurHash.h"
+#include "MouseHook.h"
+extern "C" {
+	void Capture3D(HWND hWnd, LPCSTR szFileName);
+};
 
 using namespace StringUtilities;
 
@@ -57,7 +61,9 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 		long m_ptSampleOriginX;
 		long m_ptSampleOriginY;
 		long m_nSampleLen;
-		CBitmapEx * m_pBitmap;
+	private: System::Windows::Forms::Label^  lblDrag;
+	private: System::Windows::Forms::TextBox^  txtWindowInfo;
+			 CBitmapEx * m_pBitmap;
 	public:
 		frmGetKey(void)
 		{
@@ -66,6 +72,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			//TODO: Add the constructor code here
 			//
 			m_pBitmap = new CBitmapEx();
+			CMouseHook::UWM_DRAGEEND = ::RegisterWindowMessage(UWM_DRAGEND_MSG);
 		}
 
 	protected:
@@ -148,6 +155,8 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->btnShowRect = (gcnew System::Windows::Forms::Button());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
+			this->txtWindowInfo = (gcnew System::Windows::Forms::TextBox());
+			this->lblDrag = (gcnew System::Windows::Forms::Label());
 			this->btnLoadSetting = (gcnew System::Windows::Forms::Button());
 			this->btnSaveSetting = (gcnew System::Windows::Forms::Button());
 			this->btnSelectFile = (gcnew System::Windows::Forms::Button());
@@ -212,7 +221,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->panel1->Dock = System::Windows::Forms::DockStyle::Left;
 			this->panel1->Location = System::Drawing::Point(0, 0);
 			this->panel1->Name = L"panel1";
-			this->panel1->Size = System::Drawing::Size(181, 456);
+			this->panel1->Size = System::Drawing::Size(181, 543);
 			this->panel1->TabIndex = 1;
 			// 
 			// btnShowRect
@@ -228,14 +237,36 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			// panel3
 			// 
 			this->panel3->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->panel3->Controls->Add(this->txtWindowInfo);
+			this->panel3->Controls->Add(this->lblDrag);
 			this->panel3->Controls->Add(this->btnLoadSetting);
 			this->panel3->Controls->Add(this->btnSaveSetting);
 			this->panel3->Controls->Add(this->btnSelectFile);
 			this->panel3->Dock = System::Windows::Forms::DockStyle::Bottom;
-			this->panel3->Location = System::Drawing::Point(0, 350);
+			this->panel3->Location = System::Drawing::Point(0, 335);
 			this->panel3->Name = L"panel3";
-			this->panel3->Size = System::Drawing::Size(181, 106);
+			this->panel3->Size = System::Drawing::Size(181, 208);
 			this->panel3->TabIndex = 3;
+			// 
+			// txtWindowInfo
+			// 
+			this->txtWindowInfo->Location = System::Drawing::Point(18, 108);
+			this->txtWindowInfo->Multiline = true;
+			this->txtWindowInfo->Name = L"txtWindowInfo";
+			this->txtWindowInfo->Size = System::Drawing::Size(144, 52);
+			this->txtWindowInfo->TabIndex = 3;
+			// 
+			// lblDrag
+			// 
+			this->lblDrag->AutoSize = true;
+			this->lblDrag->Font = (gcnew System::Drawing::Font(L"MS UI Gothic", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(128)));
+			this->lblDrag->Location = System::Drawing::Point(11, 78);
+			this->lblDrag->Name = L"lblDrag";
+			this->lblDrag->Size = System::Drawing::Size(26, 16);
+			this->lblDrag->TabIndex = 2;
+			this->lblDrag->Text = L"[+]";
+			this->lblDrag->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &frmGetKey::lblDrag_MouseDown);
 			// 
 			// btnLoadSetting
 			// 
@@ -259,9 +290,9 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			// 
 			// btnSelectFile
 			// 
-			this->btnSelectFile->Location = System::Drawing::Point(14, 74);
+			this->btnSelectFile->Location = System::Drawing::Point(40, 74);
 			this->btnSelectFile->Name = L"btnSelectFile";
-			this->btnSelectFile->Size = System::Drawing::Size(148, 24);
+			this->btnSelectFile->Size = System::Drawing::Size(122, 24);
 			this->btnSelectFile->TabIndex = 1;
 			this->btnSelectFile->Text = L"Select bitmap...";
 			this->btnSelectFile->UseVisualStyleBackColor = true;
@@ -450,7 +481,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->panel2->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->panel2->Location = System::Drawing::Point(181, 0);
 			this->panel2->Name = L"panel2";
-			this->panel2->Size = System::Drawing::Size(414, 456);
+			this->panel2->Size = System::Drawing::Size(414, 543);
 			this->panel2->TabIndex = 2;
 			// 
 			// picCaptureBmp
@@ -458,7 +489,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->picCaptureBmp->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->picCaptureBmp->Location = System::Drawing::Point(0, 0);
 			this->picCaptureBmp->Name = L"picCaptureBmp";
-			this->picCaptureBmp->Size = System::Drawing::Size(414, 456);
+			this->picCaptureBmp->Size = System::Drawing::Size(414, 543);
 			this->picCaptureBmp->TabIndex = 0;
 			this->picCaptureBmp->TabStop = false;
 			// 
@@ -466,14 +497,16 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(595, 456);
+			this->ClientSize = System::Drawing::Size(595, 543);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
 			this->Name = L"frmGetKey";
 			this->Text = L"frmGetKey";
+			this->TopMost = true;
 			this->panel1->ResumeLayout(false);
 			this->panel1->PerformLayout();
 			this->panel3->ResumeLayout(false);
+			this->panel3->PerformLayout();
 			this->panel2->ResumeLayout(false);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->picCaptureBmp))->EndInit();
 			this->ResumeLayout(false);
@@ -489,17 +522,22 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 
 					 m_pBitmap->Load( filename.NativeCharPtr);
 
+					 UpdatePictureBox();
+				 }
+
+			 }
+	 private: System::Void UpdatePictureBox()
+			  {
 					 HBITMAP bitmap = NULL;
 
 					 m_pBitmap->Save(bitmap);
 
-
 					 this->picCaptureBmp->Image = Image::FromHbitmap(System::IntPtr((int)bitmap));
 
+					 DeleteObject(bitmap);
+					 this->picCaptureBmp->Refresh();
 
-				 }
-
-			 }
+			  }
 
 	private: System::Void btnLoadSetting_Click(System::Object^  sender, System::EventArgs^  e) {
 
@@ -718,5 +756,79 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 					 fs.close();
 				 }
 			 }
-	};
+	private: System::Void lblDrag_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
+				 this->Cursor = Cursors::Cross ;
+				 CMouseHook::StartHook((HWND)this->Handle.ToInt32());	
+				 lblDrag->Text = "[ ]";
+			 }
+protected:
+	void GetBmpFromHwndGDI(HWND hwnd)
+	{
+		//RECT rt;
+		//GetWindowRect(hwnd, &rt);
+
+		//int nScreenWidth = rt.right  - rt.left;
+		//int nScreenHeight = rt.bottom - rt.top;
+		//HDC  hDesktopDC = GetDC(hwnd);
+
+		//HDC  hCaptureDC = CreateCompatibleDC(hDesktopDC);
+
+		//HBITMAP hCaptureBitmap = CreateCompatibleBitmap(hDesktopDC, nScreenWidth , nScreenHeight );
+
+		//SelectObject(hCaptureDC,hCaptureBitmap); 
+
+		//BitBlt(hCaptureDC,0,0,nScreenWidth,nScreenHeight,hDesktopDC,0,0,SRCCOPY); 
+
+		//this->m_pBitmap->Load(hCaptureBitmap);
+
+		//this->UpdatePictureBox();
+
+		//ReleaseDC(hwnd,hDesktopDC);
+
+		//DeleteDC(hCaptureDC);
+
+		 HDC hdc = GetWindowDC(hwnd);
+		 HBITMAP hbmp = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
+		 this->m_pBitmap->Load(hbmp);
+
+		 this->UpdatePictureBox();
+
+		 DeleteObject(hbmp);
+		 ReleaseDC(hwnd,hdc);
+
+	}
+	void GetBmpFromHwndD3D(HWND hwnd)
+	{
+		Capture3D(hwnd,"capture_tmp.bmp");
+
+		this->m_pBitmap->Load("capture_tmp.bmp");
+
+		 this->UpdatePictureBox();
+
+	}
+
+	virtual void WndProc(Message% m) override
+	{
+		if( m.Msg == CMouseHook::UWM_DRAGEEND )
+		{
+			this->Cursor = Cursors::Default ;
+			CMouseHook::StopHook();
+			 lblDrag->Text = "[+]";
+			
+			 HWND hwnd = (HWND)m.WParam.ToInt32();
+
+			 //GetBmpFromHwndGDI(hwnd);
+			 GetBmpFromHwndD3D(hwnd);
+
+			 TCHAR szStr[256];
+			 RealGetWindowClass(hwnd, szStr, sizeof(szStr));
+			 txtWindowInfo->Text = String::Format("handle:0x{0:X}",(unsigned int)hwnd);
+			 txtWindowInfo->Text += "\n Class:"+StringConvertor(szStr).ToString();
+			 GetWindowText(hwnd, szStr, sizeof(szStr));
+			 txtWindowInfo->Text += "\n Title:" + StringConvertor(szStr).ToString();
+
+		}
+		Form::WndProc(m);
+	}
+};
 }

@@ -13,6 +13,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mousehook", "script\mousehook\mousehook.vcproj", "{406D6DC0-BBB9-47CF-BAC4-6B5BBC46CF5F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "genkeytool", "script\genkeytool\genkeytool.vcproj", "{55BF58BD-0716-4658-8D03-5AD438741626}"
+	ProjectSection(ProjectDependencies) = postProject
+		{406D6DC0-BBB9-47CF-BAC4-6B5BBC46CF5F} = {406D6DC0-BBB9-47CF-BAC4-6B5BBC46CF5F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

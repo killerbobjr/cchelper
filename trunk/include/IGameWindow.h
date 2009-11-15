@@ -22,14 +22,21 @@ struct GAMEWINDOWINFO
 	bool bGameOver;				// the game over flag 
 };
 
+
 // @description
 // Interface of game window.
 // Find and maintain the handle of the actual game window. 
 //________________________________________________________________________________________
+#define GAMEWINDOW_MAXLEN	(10)
 class IGameWindow
 {
+public:
+	static int nGameWindowNum;
+	static IGameWindow * pGameWindows[GAMEWINDOW_MAXLEN];
 
-	virtual char	GetPiece( int x, int y) = 0;
+	static void AddGameWindow(IGameWindow * p);
+	static IGameWindow * SearchGameWindow() ;
+	static void ReleaseAllGameWindow();
 
 protected:
 
@@ -42,6 +49,7 @@ protected:
 		memset(&m_GameWindowInfo, 0, sizeof(m_GameWindowInfo));
 	}
 
+	virtual char	GetPiece( int x, int y) = 0;
 public:
 
 	void SetChessEngine(IChessEngine* pce)
@@ -98,5 +106,7 @@ public:
 	//_________________________________________________________________________________________
 	virtual HWND GetFrameWindowHandle() = 0;
 
-	virtual bool SaveHashValue(TCHAR * szFile, TCHAR * szBmp){ return true;};
+	virtual HWND FindGameWindow() = 0;
+
+	virtual bool LoadHashValue(TCHAR * szFile) = 0;
 };

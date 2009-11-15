@@ -12,16 +12,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 		CMouseHook::m_hModule = hModule;
-		base::Log(9,"DLL_PROCESS_ATTACH",CMouseHook::m_hWnd);
+		CMouseHook::UWM_DRAGEEND = ::RegisterWindowMessage(UWM_DRAGEND_MSG);
 		return TRUE;
 	case DLL_THREAD_ATTACH:
-		base::Log(9,"DLL_THREAD_ATTACH,%x",CMouseHook::m_hWnd );
 		break;
 	case DLL_THREAD_DETACH:
-		base::Log(9,"DLL_THREAD_DETACH,%x",CMouseHook::m_hWnd);
 		break;
 	case DLL_PROCESS_DETACH:
-		base::Log(9,"DLL_PROCESS_DETACH,%x",CMouseHook::m_hWnd);
 		break;
 	}
 	return TRUE;

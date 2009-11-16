@@ -11,7 +11,6 @@
 #include "resource.h"
 #include "mousehook.h"
 
-#include <mmsystem.h>
 
 using namespace base;
 
@@ -21,7 +20,6 @@ using namespace base;
 
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
-BOOL			g_bAlarmFlage = FALSE;
 HHOOK			g_hHookPlay = NULL;
 HHOOK			g_hHookGetMessage = NULL;
 
@@ -166,20 +164,3 @@ BOOL ExitApp()
 }
 
 
-void SetAlarm()
-{
-	if( !g_bAlarmFlage )
-	{
-		PlaySound( AppEnv::GetMediaPath(_T("alarm.wav")), NULL,  SND_FILENAME|SND_LOOP|SND_ASYNC);
-		g_bAlarmFlage = TRUE;
-	}
-}
-
-void KillAlarm()
-{
-	if( g_bAlarmFlage )
-	{
-		PlaySound( NULL, 0, SND_ASYNC);
-		g_bAlarmFlage = FALSE;
-	}
-}

@@ -8,6 +8,7 @@
 #include "resource.h"
 #include <fstream>
 #include "Json/Json.h"
+#include <mmsystem.h>
 
 using namespace base;
 
@@ -19,6 +20,7 @@ CChessBoard::CChessBoard()
 	m_pGameWindow = NULL;
 	m_pChessEngine = NULL;
 
+	m_bAlarmFlage = FALSE;
 	m_pBoardDIB	= NULL;
 	m_pBackgroundDIB	= NULL;
 	m_pMoveRectDIB	= NULL;
@@ -302,6 +304,10 @@ void CChessBoard::Update()
 					}
 				}
 			}
+			else if( gi.bAvailible && gi.bGameOver )
+			{
+				KillAlarm();
+			}
 		} else SetWindowText(g_hWndMain, _T("cchelper"));
 	} 
 	else if ( wp.showCmd == SW_SHOWMINIMIZED )
@@ -386,6 +392,24 @@ void CChessBoard::DrawBoard(GAMEWINDOWINFO * gi)
 		}
 
 		c= *(++lpFen);
+	}
+}
+
+void CChessBoard::SetAlarm()
+{
+	if( !m_bAlarmFlage )
+	{
+		PlaySound( AppEnv::GetMediaPath(_T("alarm.wav")), NULL,  SND_FILENAME|SND_LOOP|SND_ASYNC);
+		m_bAlarmFlage = TRUE;
+	}
+}
+
+void CChessBoard::KillAlarm()
+{
+	if( m_bAlarmFlage )
+	{
+		PlaySound( NULL, 0, SND_ASYNC);
+		m_bAlarmFlage = FALSE;
 	}
 }
 

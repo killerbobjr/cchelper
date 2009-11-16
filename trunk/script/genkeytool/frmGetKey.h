@@ -16,32 +16,29 @@ using namespace System::Drawing;
 #include "Json/Json.h"
 #include "MurmurHash.h"
 #include "MouseHook.h"
-extern "C" {
-	void Capture3D(HWND hWnd, LPCSTR szFileName);
-};
 
 using namespace StringUtilities;
 
 namespace genkeytool {
 
+	extern "C" {
+		void Capture3D(HWND hWnd, LPCSTR szFileName);
+		BOOL CALLBACK frmGetKey_EnumChildProc(HWND hwnd,  LPARAM lParam);
+	};
+
 #define PIECE_NUM (14)
 
 
-struct PieceHashValue
-{
-	char cPiece;
-	DWORD dwPieceHashValue;
-	int  nSquareX;
-	int  nSquareY;
-};
-
-extern 
-PieceHashValue _PieceHashValues[PIECE_NUM];
-
-	BOOL CALLBACK frmGetKey_EnumChildProc(HWND hwnd,  LPARAM lParam)
+	struct PieceHashValue
 	{
+		char cPiece;
+		DWORD dwPieceHashValue;
+		int  nSquareX;
+		int  nSquareY;
+	};
 
-	}
+	extern 
+		PieceHashValue _PieceHashValues[PIECE_NUM];
 
 	/// <summary>
 	/// Summary for frmGetKey
@@ -112,14 +109,6 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 	private: System::Windows::Forms::TextBox^  txtBoardOriginY;
 	private: System::Windows::Forms::TextBox^  txtBoardOriginX;
 
-
-
-
-
-
-
-
-
 	private: System::Windows::Forms::Panel^  panel2;
 	private: System::Windows::Forms::PictureBox^  picCaptureBmp;
 
@@ -139,8 +128,6 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 	private: System::Windows::Forms::TextBox^  txtSampleLen;
 	private: System::Windows::Forms::TextBox^  txtSampleOriginY;
 	private: System::Windows::Forms::TextBox^  txtSampleOriginX;
-
-
 
 	private: System::Windows::Forms::Label^  label10;
 	private: System::Windows::Forms::Label^  label9;
@@ -495,7 +482,6 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->txtBoardOriginY->Name = L"txtBoardOriginY";
 			this->txtBoardOriginY->Size = System::Drawing::Size(74, 19);
 			this->txtBoardOriginY->TabIndex = 0;
-			this->txtBoardOriginY->TextChanged += gcnew System::EventHandler(this, &frmGetKey::textBox2_TextChanged);
 			// 
 			// txtBoardOriginX
 			// 
@@ -546,8 +532,6 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 
 		}
 #pragma endregion
-	private: System::Void textBox2_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-			 }
 	private: System::Void btnSelectFile_Click(System::Object^  sender, System::EventArgs^  e) {
 				 if(this->dlgOpenFile->ShowDialog()== ::DialogResult::OK  )
 				 {
@@ -559,18 +543,18 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 				 }
 
 			 }
-	 private: System::Void UpdatePictureBox()
-			  {
-					 HBITMAP bitmap = NULL;
+	private: System::Void UpdatePictureBox()
+			 {
+				 HBITMAP bitmap = NULL;
 
-					 m_pBitmap->Save(bitmap);
+				 m_pBitmap->Save(bitmap);
 
-					 this->picCaptureBmp->Image = Image::FromHbitmap(System::IntPtr((int)bitmap));
+				 this->picCaptureBmp->Image = Image::FromHbitmap(System::IntPtr((int)bitmap));
 
-					 DeleteObject(bitmap);
-					 this->picCaptureBmp->Refresh();
+				 DeleteObject(bitmap);
+				 this->picCaptureBmp->Refresh();
 
-			  }
+			 }
 
 	private: bool LoadSettingFile(String ^filename)
 			 {
@@ -631,8 +615,8 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 					 LoadSettingFile( dlgOpenFile->FileName );
 				 }
 			 }
-	 private: System::Void ShowGrid()
-			  {
+	private: System::Void ShowGrid()
+			 {
 				 m_ptBoardOriginX = int::Parse(this->txtBoardOriginX->Text);
 				 m_ptBoardOriginY =int::Parse(this->txtBoardOriginY->Text);
 				 m_sizeSquareCX = int::Parse(this->txtSquareWidth ->Text);
@@ -665,7 +649,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 					 g->DrawRectangle(penGreen, this->TURN2_X, this->TURN2_Y, this->m_nSampleLen,this->m_nSampleLen ); 
 
 					 SolidBrush^ brush = gcnew SolidBrush( this->dlgFont->Color );
-					 
+
 					 g->DrawString(this->GetHashValue(TURN1_X,TURN1_Y, this->m_nSampleLen ).ToString(), dlgFont->Font, brush, (float)TURN1_X,(float)TURN1_Y );
 					 g->DrawString(this->GetHashValue(TURN2_X,TURN2_Y, this->m_nSampleLen ).ToString(), dlgFont->Font, brush, (float)TURN2_X,(float)TURN2_Y);
 
@@ -686,7 +670,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 
 					 this->picCaptureBmp->Refresh();
 				 }
-			  }
+			 }
 	private: System::Void btnShowRect_Click(System::Object^  sender, System::EventArgs^  e) {
 				 if( !this->m_pBitmap->IsValid ())
 					 MessageBox::Show("You have'nt select a bitmap or capture a picture yet");
@@ -801,102 +785,72 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 				 CMouseHook::StartHook((HWND)this->Handle.ToInt32());	
 				 lblDrag->Text = "[ ]";
 			 }
-protected:
-	void GetBmpFromHwndGDI(HWND hwnd)
-	{
-
-		 HDC hdc = GetWindowDC(hwnd);
-		 HBITMAP hbmp = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
-		 this->m_pBitmap->Load(hbmp);
-
-		 this->UpdatePictureBox();
-
-		 DeleteObject(hbmp);
-		 ReleaseDC(hwnd,hdc);
-
-	}
-	void GetBmpFromHwndD3D(HWND hwnd)
-	{
-		Capture3D(hwnd,"capture_tmp.bmp");
-
-		this->m_pBitmap->Load("capture_tmp.bmp");
-
-		this->UpdatePictureBox();
-
-	}
-
-	std::string * m_pHashString;
-
-	void AddWindowKey(HWND hwnd)
-	{
-
-		m_pHashString->append("");
-	}
-
-	TCHAR * GetFileName(TCHAR * filepath)
-	{
-		const TCHAR * delimiters = "/\\";
-
-		TCHAR * p;
-		TCHAR * plast;
-		p = _tcstok (filepath,delimiters); 
-		while(p!=NULL) 
+	protected:
+		void GetBmpFromHwndGDI(HWND hwnd)
 		{
-			plast = p;
-			p = _tcstok(NULL,delimiters); 
+
+			HDC hdc = GetWindowDC(hwnd);
+			HBITMAP hbmp = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
+			this->m_pBitmap->Load(hbmp);
+
+			this->UpdatePictureBox();
+
+			DeleteObject(hbmp);
+			ReleaseDC(hwnd,hdc);
+
 		}
-		return plast;
-	}
-
-	friend BOOL CALLBACK frmGetKey_EnumChildProc(HWND hwnd,  LPARAM lParam);
-
-
-	unsigned int GetWindowKey(HWND hwnd)
-	{
-		unsigned int key=0;
-
-		TCHAR szBuf[1024];
-		TCHAR szStr[256];
-
-		// Get module file name
-		GetWindowModuleFileName(hwnd, szStr, sizeof(szStr));
-
-		_stprintf(szBuf,"%s,0x%x",GetFileName(szStr), GetDlgCtrlID(hwnd));
-
-		EnumChildWindows(hwnd, frmGetKey_EnumChildProc, (LPARAM) this);
-
-		key = base::MurmurHash2(szBuf, strlen(szBuf));
-
-		return key;
-	}
-
-	void OnDragEnd(HWND hwnd )
-	{
-		this->Cursor = Cursors::Default ;
-		CMouseHook::StopHook();
-		lblDrag->Text = "[+]";		
-
-		//GetBmpFromHwndGDI(hwnd);
-		GetBmpFromHwndD3D(hwnd);
-
-		this->txtWindowInfo->Text = String::Format("WindowKey=:{0:X}", GetWindowKey(hwnd));
-	}
-
-	virtual void WndProc(Message% m) override
-	{
-		if( m.Msg == CMouseHook::UWM_DRAGEEND )
+		void GetBmpFromHwndD3D(HWND hwnd)
 		{
-			HWND hwnd = (HWND)m.WParam.ToInt32();
-			OnDragEnd(hwnd);
-		}
-		Form::WndProc(m);
-	}
+			Capture3D(hwnd,"capture_tmp.bmp");
 
-private: System::Void btnFont_Click(System::Object^  sender, System::EventArgs^  e) {
-			 if(dlgFont->ShowDialog() == ::DialogResult::OK )
-			 {
-				 ShowGrid();
+			this->m_pBitmap->Load("capture_tmp.bmp");
+
+			this->UpdatePictureBox();
+
+		}
+
+
+		unsigned int GetWindowKey(HWND hwnd)
+		{
+			unsigned int key;
+
+			std::string strHash;
+
+			EnumChildWindows(hwnd, frmGetKey_EnumChildProc, (LPARAM) &strHash);
+
+			key = base::MurmurHash2(strHash.c_str(), strHash.length());
+
+			return key;
+		}
+
+		void OnDragEnd(HWND hwnd )
+		{
+			this->Cursor = Cursors::Default ;
+			CMouseHook::StopHook();
+			lblDrag->Text = "[+]";		
+
+			//GetBmpFromHwndGDI(hwnd);
+			GetBmpFromHwndD3D(hwnd);
+
+			this->txtWindowInfo->Text = String::Format("WindowKey=:{0:X}", GetWindowKey(hwnd));
+		}
+
+		virtual void WndProc(Message% m) override
+		{
+			if( m.Msg == CMouseHook::UWM_DRAGEEND )
+			{
+				HWND hwnd = (HWND)m.WParam.ToInt32();
+				OnDragEnd(hwnd);
+			}
+			Form::WndProc(m);
+		}
+
+	private: System::Void btnFont_Click(System::Object^  sender, System::EventArgs^  e) {
+				 if(dlgFont->ShowDialog() == ::DialogResult::OK )
+				 {
+					 ShowGrid();
+				 }
 			 }
-		 }
-};
+	};
+
 }

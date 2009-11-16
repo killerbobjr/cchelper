@@ -7,11 +7,11 @@ using namespace System::Windows::Forms;
 using namespace System::Data;
 using namespace System::Drawing;
 
-extern "C" {
-	void Capture3D(HWND hWnd, LPCSTR szFileName);
-};
 
 namespace genkeytool {
+	extern "C" {
+		void Capture3D(HWND hWnd, LPCSTR szFileName);
+	};
 
 	/// <summary>
 	/// Summary for frmMain
@@ -554,17 +554,17 @@ namespace genkeytool {
 					 this->txtHandle->Text = String::Format("{0}", (unsigned int)m_hWnd);
 					 this->txtRectTop->Text = String::Format("{0}",pt.x) ;
 					 this->txtRectLeft->Text = String::Format("{0}",pt.y) ;
-					Capture3D(m_hWnd, "szFileName.bmp");
+					 Capture3D(m_hWnd, "szFileName.bmp");
 				 }
 
 			 }
 	private: System::Void frmMain_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
-					 if( m_hWnd )
-					Capture3D(m_hWnd, "szFileName.bmp");
+				 if( m_hWnd )
+					 Capture3D(m_hWnd, "szFileName.bmp");
 			 }
-private: System::Void frmMain_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
-					 if( m_hWnd )
-					Capture3D(m_hWnd, "szFileName.bmp");
-		 }
-};
+	private: System::Void frmMain_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+				 if( m_hWnd )
+					 Capture3D(m_hWnd, "szFileName.bmp");
+			 }
+	};
 }

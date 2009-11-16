@@ -38,6 +38,11 @@ struct PieceHashValue
 extern 
 PieceHashValue _PieceHashValues[PIECE_NUM];
 
+	BOOL CALLBACK frmGetKey_EnumChildProc(HWND hwnd,  LPARAM lParam)
+	{
+
+	}
+
 	/// <summary>
 	/// Summary for frmGetKey
 	///
@@ -61,9 +66,15 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 		long m_ptSampleOriginX;
 		long m_ptSampleOriginY;
 		long m_nSampleLen;
+
+
+		CBitmapEx * m_pBitmap;
 	private: System::Windows::Forms::Label^  lblDrag;
 	private: System::Windows::Forms::TextBox^  txtWindowInfo;
-			 CBitmapEx * m_pBitmap;
+	private: System::Windows::Forms::FontDialog^  dlgFont;
+	private: System::Windows::Forms::Button^  btnFont;
+
+
 	public:
 		frmGetKey(void)
 		{
@@ -73,6 +84,11 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			//
 			m_pBitmap = new CBitmapEx();
 			CMouseHook::UWM_DRAGEEND = ::RegisterWindowMessage(UWM_DRAGEND_MSG);
+
+			this->dlgFont->Font  = gcnew Drawing::Font("Consolas", 8);
+
+			LoadSettingFile("hv_qq.ini");
+
 		}
 
 	protected:
@@ -153,6 +169,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 		void InitializeComponent(void)
 		{
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->btnFont = (gcnew System::Windows::Forms::Button());
 			this->btnShowRect = (gcnew System::Windows::Forms::Button());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->txtWindowInfo = (gcnew System::Windows::Forms::TextBox());
@@ -186,6 +203,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->picCaptureBmp = (gcnew System::Windows::Forms::PictureBox());
 			this->dlgOpenFile = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dlgSaveFile = (gcnew System::Windows::Forms::SaveFileDialog());
+			this->dlgFont = (gcnew System::Windows::Forms::FontDialog());
 			this->panel1->SuspendLayout();
 			this->panel3->SuspendLayout();
 			this->panel2->SuspendLayout();
@@ -194,6 +212,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			// 
 			// panel1
 			// 
+			this->panel1->Controls->Add(this->btnFont);
 			this->panel1->Controls->Add(this->btnShowRect);
 			this->panel1->Controls->Add(this->panel3);
 			this->panel1->Controls->Add(this->label10);
@@ -224,19 +243,29 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->panel1->Size = System::Drawing::Size(181, 543);
 			this->panel1->TabIndex = 1;
 			// 
+			// btnFont
+			// 
+			this->btnFont->Location = System::Drawing::Point(13, 307);
+			this->btnFont->Name = L"btnFont";
+			this->btnFont->Size = System::Drawing::Size(50, 21);
+			this->btnFont->TabIndex = 5;
+			this->btnFont->Text = L"Font...";
+			this->btnFont->UseVisualStyleBackColor = true;
+			this->btnFont->Click += gcnew System::EventHandler(this, &frmGetKey::btnFont_Click);
+			// 
 			// btnShowRect
 			// 
-			this->btnShowRect->Location = System::Drawing::Point(15, 306);
+			this->btnShowRect->Location = System::Drawing::Point(75, 306);
 			this->btnShowRect->Name = L"btnShowRect";
-			this->btnShowRect->Size = System::Drawing::Size(148, 23);
+			this->btnShowRect->Size = System::Drawing::Size(95, 23);
 			this->btnShowRect->TabIndex = 4;
-			this->btnShowRect->Text = L"Show rectangle";
+			this->btnShowRect->Text = L"Show Grid";
 			this->btnShowRect->UseVisualStyleBackColor = true;
 			this->btnShowRect->Click += gcnew System::EventHandler(this, &frmGetKey::btnShowRect_Click);
 			// 
 			// panel3
 			// 
-			this->panel3->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->panel3->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
 			this->panel3->Controls->Add(this->txtWindowInfo);
 			this->panel3->Controls->Add(this->lblDrag);
 			this->panel3->Controls->Add(this->btnLoadSetting);
@@ -481,7 +510,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->panel2->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->panel2->Location = System::Drawing::Point(181, 0);
 			this->panel2->Name = L"panel2";
-			this->panel2->Size = System::Drawing::Size(414, 543);
+			this->panel2->Size = System::Drawing::Size(461, 543);
 			this->panel2->TabIndex = 2;
 			// 
 			// picCaptureBmp
@@ -489,15 +518,19 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 			this->picCaptureBmp->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->picCaptureBmp->Location = System::Drawing::Point(0, 0);
 			this->picCaptureBmp->Name = L"picCaptureBmp";
-			this->picCaptureBmp->Size = System::Drawing::Size(414, 543);
+			this->picCaptureBmp->Size = System::Drawing::Size(461, 543);
 			this->picCaptureBmp->TabIndex = 0;
 			this->picCaptureBmp->TabStop = false;
+			// 
+			// dlgFont
+			// 
+			this->dlgFont->ShowColor = true;
 			// 
 			// frmGetKey
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(595, 543);
+			this->ClientSize = System::Drawing::Size(642, 543);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
 			this->Name = L"frmGetKey";
@@ -539,12 +572,11 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 
 			  }
 
-	private: System::Void btnLoadSetting_Click(System::Object^  sender, System::EventArgs^  e) {
-
-				 if(this->dlgOpenFile->ShowDialog() == ::DialogResult::OK )
+	private: bool LoadSettingFile(String ^filename)
+			 {
+				 try
 				 {
-					 StringConvertor sc(dlgOpenFile->FileName);
-
+					 StringConvertor sc(filename);
 
 					 Json::Value  vRoot;
 					 std::ifstream fs(sc.NativeCharPtr);
@@ -579,29 +611,28 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 						 txtTURN2_X->Text 			=(vRoot["TURN2_X"].asInt().ToString());
 						 txtTURN2_Y->Text 			=(vRoot["TURN2_Y"].asInt().ToString());
 
-						 //TURN_WHITE_KEY	=vRoot["TURN_WHITE_KEY"].asUInt();
-						 //TURN_BLACK_KEY	=vRoot["TURN_BLACK_KEY"].asUInt();
-
-						 //Json::Value vPieceHashTable;
-
-						 //vPieceHashTable = vRoot["PieceHashTable"];
-
-						 //int size = vPieceHashTable.size() ;
-						 //assert(size == PIECE_NUM);
-
-						 //for ( int index =0; index < size; ++index )
-						 //{
-						 //	_PieceHashValues[index].cPiece = vPieceHashTable[index]["PieceKey"].asUInt() ;
-						 //	_PieceHashValues[index].dwPieceHashValue = vPieceHashTable[index]["PieceHash"].asUInt() ;
-						 //}
-
 					 }
 					 fs.close();
+					 return true;
+				 }
+				 catch(...)
+				 {
+					 MessageBox::Show( "Could not found setting file:" + filename, "Load setting file failed",
+						 MessageBoxButtons::OK, MessageBoxIcon::Error  );
+
+					 return false;
+				 }
+
+			 }
+	private: System::Void btnLoadSetting_Click(System::Object^  sender, System::EventArgs^  e) {
+
+				 if(this->dlgOpenFile->ShowDialog() == ::DialogResult::OK )
+				 {
+					 LoadSettingFile( dlgOpenFile->FileName );
 				 }
 			 }
-	private: System::Void btnShowRect_Click(System::Object^  sender, System::EventArgs^  e) {
-
-
+	 private: System::Void ShowGrid()
+			  {
 				 m_ptBoardOriginX = int::Parse(this->txtBoardOriginX->Text);
 				 m_ptBoardOriginY =int::Parse(this->txtBoardOriginY->Text);
 				 m_sizeSquareCX = int::Parse(this->txtSquareWidth ->Text);
@@ -629,12 +660,14 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 
 					 Drawing::Pen ^ penRed = gcnew Pen(Color::Red);
 					 Drawing::Pen ^ penGreen = gcnew Pen(Color::Green);
+
 					 g->DrawRectangle(penGreen, this->TURN1_X, this->TURN1_Y, this->m_nSampleLen,this->m_nSampleLen ); 
 					 g->DrawRectangle(penGreen, this->TURN2_X, this->TURN2_Y, this->m_nSampleLen,this->m_nSampleLen ); 
 
-					 Drawing::Font ^ font = gcnew Drawing::Font("Consolas", 8);
-					 g->DrawString(this->GetHashValue(TURN1_X,TURN1_Y, this->m_nSampleLen ).ToString(), font, Brushes::White, (float)TURN1_X,(float)TURN1_Y );
-					 g->DrawString(this->GetHashValue(TURN2_X,TURN2_Y, this->m_nSampleLen ).ToString(), font, Brushes::White, (float)TURN2_X,(float)TURN2_Y);
+					 SolidBrush^ brush = gcnew SolidBrush( this->dlgFont->Color );
+					 
+					 g->DrawString(this->GetHashValue(TURN1_X,TURN1_Y, this->m_nSampleLen ).ToString(), dlgFont->Font, brush, (float)TURN1_X,(float)TURN1_Y );
+					 g->DrawString(this->GetHashValue(TURN2_X,TURN2_Y, this->m_nSampleLen ).ToString(), dlgFont->Font, brush, (float)TURN2_X,(float)TURN2_Y);
 
 					 for( int qy = 0; qy < 10; qy++)
 					 {
@@ -645,13 +678,20 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 							 g->DrawRectangle(penRed, pt.x , pt.y, this->m_sizeSquareCX,this->m_sizeSquareCY ); 
 							 g->DrawRectangle(penGreen, pt.x + this->m_ptSampleOriginX , pt.y + this->m_ptSampleOriginY, 
 								 this->m_nSampleLen,this->m_nSampleLen );
-
-							 g->DrawString(this->GetHashValue(qx,qy).ToString(), font, Brushes::White, (float)pt.x,(float)pt.y + qx * 6 );
+							 static bool bFlag = false;
+							 bFlag = !bFlag;
+							 g->DrawString(this->GetHashValue(qx,qy).ToString(), dlgFont->Font, brush, (float)pt.x,(float)pt.y + (bFlag?dlgFont->Font->Size:0) );
 						 }
 					 }
 
 					 this->picCaptureBmp->Refresh();
 				 }
+			  }
+	private: System::Void btnShowRect_Click(System::Object^  sender, System::EventArgs^  e) {
+				 if( !this->m_pBitmap->IsValid ())
+					 MessageBox::Show("You have'nt select a bitmap or capture a picture yet");
+				 else
+					 ShowGrid();
 			 }
 
 
@@ -670,7 +710,7 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 					 pSampleData[i] = m_pBitmap->GetPixel( x++, y++);
 				 }
 
-				 k = base::MurmurHash2(pSampleData, len * sizeof(DWORD), HASH_SEED);
+				 k = base::MurmurHash2(pSampleData, len * sizeof(DWORD));
 
 				 delete pSampleData;
 
@@ -764,28 +804,6 @@ PieceHashValue _PieceHashValues[PIECE_NUM];
 protected:
 	void GetBmpFromHwndGDI(HWND hwnd)
 	{
-		//RECT rt;
-		//GetWindowRect(hwnd, &rt);
-
-		//int nScreenWidth = rt.right  - rt.left;
-		//int nScreenHeight = rt.bottom - rt.top;
-		//HDC  hDesktopDC = GetDC(hwnd);
-
-		//HDC  hCaptureDC = CreateCompatibleDC(hDesktopDC);
-
-		//HBITMAP hCaptureBitmap = CreateCompatibleBitmap(hDesktopDC, nScreenWidth , nScreenHeight );
-
-		//SelectObject(hCaptureDC,hCaptureBitmap); 
-
-		//BitBlt(hCaptureDC,0,0,nScreenWidth,nScreenHeight,hDesktopDC,0,0,SRCCOPY); 
-
-		//this->m_pBitmap->Load(hCaptureBitmap);
-
-		//this->UpdatePictureBox();
-
-		//ReleaseDC(hwnd,hDesktopDC);
-
-		//DeleteDC(hCaptureDC);
 
 		 HDC hdc = GetWindowDC(hwnd);
 		 HBITMAP hbmp = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
@@ -803,32 +821,82 @@ protected:
 
 		this->m_pBitmap->Load("capture_tmp.bmp");
 
-		 this->UpdatePictureBox();
+		this->UpdatePictureBox();
 
+	}
+
+	std::string * m_pHashString;
+
+	void AddWindowKey(HWND hwnd)
+	{
+
+		m_pHashString->append("");
+	}
+
+	TCHAR * GetFileName(TCHAR * filepath)
+	{
+		const TCHAR * delimiters = "/\\";
+
+		TCHAR * p;
+		TCHAR * plast;
+		p = _tcstok (filepath,delimiters); 
+		while(p!=NULL) 
+		{
+			plast = p;
+			p = _tcstok(NULL,delimiters); 
+		}
+		return plast;
+	}
+
+	friend BOOL CALLBACK frmGetKey_EnumChildProc(HWND hwnd,  LPARAM lParam);
+
+
+	unsigned int GetWindowKey(HWND hwnd)
+	{
+		unsigned int key=0;
+
+		TCHAR szBuf[1024];
+		TCHAR szStr[256];
+
+		// Get module file name
+		GetWindowModuleFileName(hwnd, szStr, sizeof(szStr));
+
+		_stprintf(szBuf,"%s,0x%x",GetFileName(szStr), GetDlgCtrlID(hwnd));
+
+		EnumChildWindows(hwnd, frmGetKey_EnumChildProc, (LPARAM) this);
+
+		key = base::MurmurHash2(szBuf, strlen(szBuf));
+
+		return key;
+	}
+
+	void OnDragEnd(HWND hwnd )
+	{
+		this->Cursor = Cursors::Default ;
+		CMouseHook::StopHook();
+		lblDrag->Text = "[+]";		
+
+		//GetBmpFromHwndGDI(hwnd);
+		GetBmpFromHwndD3D(hwnd);
+
+		this->txtWindowInfo->Text = String::Format("WindowKey=:{0:X}", GetWindowKey(hwnd));
 	}
 
 	virtual void WndProc(Message% m) override
 	{
 		if( m.Msg == CMouseHook::UWM_DRAGEEND )
 		{
-			this->Cursor = Cursors::Default ;
-			CMouseHook::StopHook();
-			 lblDrag->Text = "[+]";
-			
-			 HWND hwnd = (HWND)m.WParam.ToInt32();
-
-			 //GetBmpFromHwndGDI(hwnd);
-			 GetBmpFromHwndD3D(hwnd);
-
-			 TCHAR szStr[256];
-			 RealGetWindowClass(hwnd, szStr, sizeof(szStr));
-			 txtWindowInfo->Text = String::Format("handle:0x{0:X}",(unsigned int)hwnd);
-			 txtWindowInfo->Text += "\n Class:"+StringConvertor(szStr).ToString();
-			 GetWindowText(hwnd, szStr, sizeof(szStr));
-			 txtWindowInfo->Text += "\n Title:" + StringConvertor(szStr).ToString();
-
+			HWND hwnd = (HWND)m.WParam.ToInt32();
+			OnDragEnd(hwnd);
 		}
 		Form::WndProc(m);
 	}
+
+private: System::Void btnFont_Click(System::Object^  sender, System::EventArgs^  e) {
+			 if(dlgFont->ShowDialog() == ::DialogResult::OK )
+			 {
+				 ShowGrid();
+			 }
+		 }
 };
 }

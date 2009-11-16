@@ -37,6 +37,8 @@ class CChessBoard
 	SIZE	m_sizePiece;
 	SIZE	m_sizeSquare;
 
+	BOOL	m_bAlarmFlage ;
+
 public:
 	BOOL LoadMedia();
 	void ReleaseMedia();
@@ -96,5 +98,8 @@ public:
 	void DrawBoard(GAMEWINDOWINFO * gi);
 	void DrawPiece(char piece, int x, int y);
 	void DrawBoard(char * fen);
+
+	void SetAlarm();
+	void KillAlarm();
 
 };

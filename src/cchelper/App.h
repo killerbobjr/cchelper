@@ -19,5 +19,3 @@ BOOL InitApp();
 BOOL AppLoop();
 BOOL ExitApp();
 
-void SetAlarm();
-void KillAlarm();

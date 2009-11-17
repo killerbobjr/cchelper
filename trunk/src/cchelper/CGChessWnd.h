@@ -64,6 +64,8 @@ private:
 	SIZE  m_sizeSquare;
 	POINT m_ptSampleOrigin;
 	int   m_nSampleLen;
+	unsigned int m_uWindowKey;
+	unsigned int m_uDisplayModeFormat;
 
 	POINT GetSquareOrigin(int squarex, int squarey)
 	{

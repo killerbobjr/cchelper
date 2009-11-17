@@ -821,10 +821,7 @@ namespace genkeytool {
 						 vRoot["TURN_WHITE_KEY"]	= (unsigned int)GetHashValue(TURN1_X, TURN1_Y, m_nSampleLen);
 						 vRoot["TURN_BLACK_KEY"]	= (unsigned int)GetHashValue(TURN2_X, TURN2_Y, m_nSampleLen);
 
-
-
 						 Json::Value vPieceHashTable;
-
 
 						 int size = PIECE_NUM ;
 						 DWORD k;
@@ -843,6 +840,7 @@ namespace genkeytool {
 					 fs.close();
 				 }
 			 }
+
 	private: System::Void lblDrag_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
 				 this->Cursor = Cursors::Cross ;
 				 CMouseHook::StartHook((HWND)this->Handle.ToInt32());	
@@ -852,7 +850,6 @@ namespace genkeytool {
 
 		void GetBmpFromHwndGDI(HWND hwnd)
 		{
-
 			HDC hdc = GetWindowDC(hwnd);
 			HBITMAP hbmp = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
 			this->m_pBitmap->Load(hbmp);
@@ -861,8 +858,8 @@ namespace genkeytool {
 
 			DeleteObject(hbmp);
 			ReleaseDC(hwnd,hdc);
-
 		}
+
 		void GetBmpFromHwndD3D(HWND hwnd)
 		{
 			if( !m_pCapture )
@@ -878,7 +875,6 @@ namespace genkeytool {
 				this->txtDisplayMode->Text  = m_dwDisplayModeFormat.ToString();
 				this->ShowGrid();
 			}
-
 		}
 
 		void OnDragEnd(HWND hwnd )

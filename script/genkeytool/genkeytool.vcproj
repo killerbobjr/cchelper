@@ -219,6 +219,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\src\capture\capture.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\frmGetKey.cpp"
 				>
 			</File>

@@ -16,15 +16,13 @@ using namespace System::Drawing;
 #include "Json/Json.h"
 #include "MurmurHash.h"
 #include "MouseHook.h"
+#include "capture.h"
 
 using namespace StringUtilities;
+using namespace capture;
 
 namespace genkeytool {
 
-	extern "C" {
-		void Capture3D(HWND hWnd, LPCSTR szFileName);
-		BOOL CALLBACK frmGetKey_EnumChildProc(HWND hwnd,  LPARAM lParam);
-	};
 
 #define PIECE_NUM (14)
 
@@ -63,12 +61,19 @@ namespace genkeytool {
 		long m_ptSampleOriginX;
 		long m_ptSampleOriginY;
 		long m_nSampleLen;
+		DWORD m_dwDisplayModeFormat;
+		unsigned int m_uWindowKey;
 
-
+		ScreenCapture * m_pCapture;
 		CBitmapEx * m_pBitmap;
 	private: System::Windows::Forms::Label^  lblDrag;
 	private: System::Windows::Forms::TextBox^  txtWindowInfo;
 	private: System::Windows::Forms::FontDialog^  dlgFont;
+	private: System::Windows::Forms::Label^  label11;
+	private: System::Windows::Forms::TextBox^  txtWindowKey;
+	private: System::Windows::Forms::Label^  label12;
+	private: System::Windows::Forms::TextBox^  txtDisplayMode;
+
 	private: System::Windows::Forms::Button^  btnFont;
 
 
@@ -79,6 +84,7 @@ namespace genkeytool {
 			//
 			//TODO: Add the constructor code here
 			//
+			m_pCapture = new ScreenCapture();
 			m_pBitmap = new CBitmapEx();
 			CMouseHook::UWM_DRAGEEND = ::RegisterWindowMessage(UWM_DRAGEND_MSG);
 
@@ -100,6 +106,9 @@ namespace genkeytool {
 			}
 			if( m_pBitmap)
 				delete m_pBitmap;
+
+			if( m_pCapture )
+				delete m_pCapture;
 		}
 	private: System::Windows::Forms::Panel^  panel1;
 	private: System::Windows::Forms::Button^  btnSaveSetting;
@@ -108,9 +117,10 @@ namespace genkeytool {
 	private: System::Windows::Forms::TextBox^  txtSquareWidth;
 	private: System::Windows::Forms::TextBox^  txtBoardOriginY;
 	private: System::Windows::Forms::TextBox^  txtBoardOriginX;
+	private: System::Windows::Forms::Panel^  panelPic;
 
-	private: System::Windows::Forms::Panel^  panel2;
-	private: System::Windows::Forms::PictureBox^  picCaptureBmp;
+
+
 
 	private: System::Windows::Forms::OpenFileDialog^  dlgOpenFile;
 
@@ -164,6 +174,8 @@ namespace genkeytool {
 			this->btnLoadSetting = (gcnew System::Windows::Forms::Button());
 			this->btnSaveSetting = (gcnew System::Windows::Forms::Button());
 			this->btnSelectFile = (gcnew System::Windows::Forms::Button());
+			this->label12 = (gcnew System::Windows::Forms::Label());
+			this->label11 = (gcnew System::Windows::Forms::Label());
 			this->label10 = (gcnew System::Windows::Forms::Label());
 			this->label9 = (gcnew System::Windows::Forms::Label());
 			this->label8 = (gcnew System::Windows::Forms::Label());
@@ -174,6 +186,8 @@ namespace genkeytool {
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->txtDisplayMode = (gcnew System::Windows::Forms::TextBox());
+			this->txtWindowKey = (gcnew System::Windows::Forms::TextBox());
 			this->lblX = (gcnew System::Windows::Forms::Label());
 			this->txtTURN2_Y = (gcnew System::Windows::Forms::TextBox());
 			this->txtTURN2_X = (gcnew System::Windows::Forms::TextBox());
@@ -186,15 +200,12 @@ namespace genkeytool {
 			this->txtSquareWidth = (gcnew System::Windows::Forms::TextBox());
 			this->txtBoardOriginY = (gcnew System::Windows::Forms::TextBox());
 			this->txtBoardOriginX = (gcnew System::Windows::Forms::TextBox());
-			this->panel2 = (gcnew System::Windows::Forms::Panel());
-			this->picCaptureBmp = (gcnew System::Windows::Forms::PictureBox());
+			this->panelPic = (gcnew System::Windows::Forms::Panel());
 			this->dlgOpenFile = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dlgSaveFile = (gcnew System::Windows::Forms::SaveFileDialog());
 			this->dlgFont = (gcnew System::Windows::Forms::FontDialog());
 			this->panel1->SuspendLayout();
 			this->panel3->SuspendLayout();
-			this->panel2->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->picCaptureBmp))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// panel1
@@ -202,6 +213,8 @@ namespace genkeytool {
 			this->panel1->Controls->Add(this->btnFont);
 			this->panel1->Controls->Add(this->btnShowRect);
 			this->panel1->Controls->Add(this->panel3);
+			this->panel1->Controls->Add(this->label12);
+			this->panel1->Controls->Add(this->label11);
 			this->panel1->Controls->Add(this->label10);
 			this->panel1->Controls->Add(this->label9);
 			this->panel1->Controls->Add(this->label8);
@@ -212,6 +225,8 @@ namespace genkeytool {
 			this->panel1->Controls->Add(this->label3);
 			this->panel1->Controls->Add(this->label2);
 			this->panel1->Controls->Add(this->label1);
+			this->panel1->Controls->Add(this->txtDisplayMode);
+			this->panel1->Controls->Add(this->txtWindowKey);
 			this->panel1->Controls->Add(this->lblX);
 			this->panel1->Controls->Add(this->txtTURN2_Y);
 			this->panel1->Controls->Add(this->txtTURN2_X);
@@ -232,7 +247,7 @@ namespace genkeytool {
 			// 
 			// btnFont
 			// 
-			this->btnFont->Location = System::Drawing::Point(13, 307);
+			this->btnFont->Location = System::Drawing::Point(18, 363);
 			this->btnFont->Name = L"btnFont";
 			this->btnFont->Size = System::Drawing::Size(50, 21);
 			this->btnFont->TabIndex = 5;
@@ -242,7 +257,7 @@ namespace genkeytool {
 			// 
 			// btnShowRect
 			// 
-			this->btnShowRect->Location = System::Drawing::Point(75, 306);
+			this->btnShowRect->Location = System::Drawing::Point(80, 362);
 			this->btnShowRect->Name = L"btnShowRect";
 			this->btnShowRect->Size = System::Drawing::Size(95, 23);
 			this->btnShowRect->TabIndex = 4;
@@ -259,9 +274,9 @@ namespace genkeytool {
 			this->panel3->Controls->Add(this->btnSaveSetting);
 			this->panel3->Controls->Add(this->btnSelectFile);
 			this->panel3->Dock = System::Windows::Forms::DockStyle::Bottom;
-			this->panel3->Location = System::Drawing::Point(0, 335);
+			this->panel3->Location = System::Drawing::Point(0, 402);
 			this->panel3->Name = L"panel3";
-			this->panel3->Size = System::Drawing::Size(181, 208);
+			this->panel3->Size = System::Drawing::Size(181, 141);
 			this->panel3->TabIndex = 3;
 			// 
 			// txtWindowInfo
@@ -269,7 +284,7 @@ namespace genkeytool {
 			this->txtWindowInfo->Location = System::Drawing::Point(18, 108);
 			this->txtWindowInfo->Multiline = true;
 			this->txtWindowInfo->Name = L"txtWindowInfo";
-			this->txtWindowInfo->Size = System::Drawing::Size(144, 52);
+			this->txtWindowInfo->Size = System::Drawing::Size(144, 20);
 			this->txtWindowInfo->TabIndex = 3;
 			// 
 			// lblDrag
@@ -313,6 +328,24 @@ namespace genkeytool {
 			this->btnSelectFile->Text = L"Select bitmap...";
 			this->btnSelectFile->UseVisualStyleBackColor = true;
 			this->btnSelectFile->Click += gcnew System::EventHandler(this, &frmGetKey::btnSelectFile_Click);
+			// 
+			// label12
+			// 
+			this->label12->AutoSize = true;
+			this->label12->Location = System::Drawing::Point(22, 329);
+			this->label12->Name = L"label12";
+			this->label12->Size = System::Drawing::Size(70, 12);
+			this->label12->TabIndex = 2;
+			this->label12->Text = L"DisplayMode";
+			// 
+			// label11
+			// 
+			this->label11->AutoSize = true;
+			this->label11->Location = System::Drawing::Point(30, 304);
+			this->label11->Name = L"label11";
+			this->label11->Size = System::Drawing::Size(62, 12);
+			this->label11->TabIndex = 2;
+			this->label11->Text = L"WindowKey";
 			// 
 			// label10
 			// 
@@ -404,6 +437,23 @@ namespace genkeytool {
 			this->label1->TabIndex = 2;
 			this->label1->Text = L"BoardOriginY";
 			// 
+			// txtDisplayMode
+			// 
+			this->txtDisplayMode->AcceptsReturn = true;
+			this->txtDisplayMode->Enabled = false;
+			this->txtDisplayMode->Location = System::Drawing::Point(101, 326);
+			this->txtDisplayMode->Name = L"txtDisplayMode";
+			this->txtDisplayMode->Size = System::Drawing::Size(74, 19);
+			this->txtDisplayMode->TabIndex = 0;
+			// 
+			// txtWindowKey
+			// 
+			this->txtWindowKey->Enabled = false;
+			this->txtWindowKey->Location = System::Drawing::Point(101, 301);
+			this->txtWindowKey->Name = L"txtWindowKey";
+			this->txtWindowKey->Size = System::Drawing::Size(74, 19);
+			this->txtWindowKey->TabIndex = 0;
+			// 
 			// lblX
 			// 
 			this->lblX->AutoSize = true;
@@ -490,23 +540,17 @@ namespace genkeytool {
 			this->txtBoardOriginX->Size = System::Drawing::Size(74, 19);
 			this->txtBoardOriginX->TabIndex = 0;
 			// 
-			// panel2
+			// panelPic
 			// 
-			this->panel2->Controls->Add(this->picCaptureBmp);
-			this->panel2->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->panel2->Location = System::Drawing::Point(181, 0);
-			this->panel2->Name = L"panel2";
-			this->panel2->Size = System::Drawing::Size(461, 543);
-			this->panel2->TabIndex = 2;
-			// 
-			// picCaptureBmp
-			// 
-			this->picCaptureBmp->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->picCaptureBmp->Location = System::Drawing::Point(0, 0);
-			this->picCaptureBmp->Name = L"picCaptureBmp";
-			this->picCaptureBmp->Size = System::Drawing::Size(461, 543);
-			this->picCaptureBmp->TabIndex = 0;
-			this->picCaptureBmp->TabStop = false;
+			this->panelPic->BackColor = System::Drawing::Color::Black;
+			this->panelPic->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->panelPic->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->panelPic->Location = System::Drawing::Point(181, 0);
+			this->panelPic->Name = L"panelPic";
+			this->panelPic->Size = System::Drawing::Size(461, 543);
+			this->panelPic->TabIndex = 2;
+			this->panelPic->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &frmGetKey::panelPic_Paint);
+			this->panelPic->SizeChanged += gcnew System::EventHandler(this, &frmGetKey::panelPic_SizeChanged);
 			// 
 			// dlgFont
 			// 
@@ -517,7 +561,7 @@ namespace genkeytool {
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(642, 543);
-			this->Controls->Add(this->panel2);
+			this->Controls->Add(this->panelPic);
 			this->Controls->Add(this->panel1);
 			this->Name = L"frmGetKey";
 			this->Text = L"frmGetKey";
@@ -526,8 +570,6 @@ namespace genkeytool {
 			this->panel1->PerformLayout();
 			this->panel3->ResumeLayout(false);
 			this->panel3->PerformLayout();
-			this->panel2->ResumeLayout(false);
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->picCaptureBmp))->EndInit();
 			this->ResumeLayout(false);
 
 		}
@@ -539,21 +581,40 @@ namespace genkeytool {
 
 					 m_pBitmap->Load( filename.NativeCharPtr);
 
-					 UpdatePictureBox();
+					 ShowGrid();
 				 }
 
 			 }
 	private: System::Void UpdatePictureBox()
 			 {
-				 HBITMAP bitmap = NULL;
+				 //HBITMAP bitmap = NULL;
+				 //try
+				 //{
 
-				 m_pBitmap->Save(bitmap);
 
-				 this->picCaptureBmp->Image = Image::FromHbitmap(System::IntPtr((int)bitmap));
+				 // m_pBitmap->Save(bitmap);
+					// 
 
-				 DeleteObject(bitmap);
-				 this->picCaptureBmp->Refresh();
+				 // this->picCaptureBmp->Image = Bitmap::FromHbitmap(System::IntPtr((int)bitmap));
 
+				 // this->picCaptureBmp->Refresh();
+				 //}
+				 //catch(System::Exception ^ e)
+				 //{
+				 // if(bitmap)
+				 //	 DeleteObject(bitmap);
+
+				 // System::Diagnostics::Debug::Print(e->Message);
+				 //}
+
+				 //HDC hdc = GetDC((HWND)this->picCaptureBmp->Handle.ToInt32());
+				 //m_pBitmap->Draw(hdc);
+				 //ReleaseDC((HWND)this->picCaptureBmp->Handle.ToInt32(), hdc);
+
+
+				 HDC hdc = GetDC((HWND)this->panelPic->Handle.ToInt32());
+				 m_pBitmap->Draw(hdc);
+				 ReleaseDC((HWND)this->panelPic->Handle.ToInt32(), hdc);
 			 }
 
 	private: bool LoadSettingFile(String ^filename)
@@ -576,6 +637,8 @@ namespace genkeytool {
 						 m_ptSampleOriginX = vRoot["SampleOriginX"].asInt();
 						 m_ptSampleOriginY = vRoot["SampleOriginY"].asInt();
 						 m_nSampleLen = vRoot["SampleLen"].asInt();
+						 m_dwDisplayModeFormat = (DWORD)vRoot["DisplayModeFormat"].asUInt();
+						 m_uWindowKey = vRoot["WindowKey"].asUInt();
 
 						 TURN1_X			=vRoot["TURN1_X"].asInt();
 						 TURN1_Y			=vRoot["TURN1_Y"].asInt();
@@ -589,6 +652,8 @@ namespace genkeytool {
 						 this->txtSampleOriginX->Text =(vRoot["SampleOriginX"].asInt().ToString());
 						 this->txtSampleOriginY->Text = (vRoot["SampleOriginY"].asInt().ToString());
 						 this->txtSampleLen->Text = (vRoot["SampleLen"].asInt().ToString());
+						 this->txtWindowKey->Text = vRoot["WindowKey"].asUInt().ToString();
+						 this->txtDisplayMode->Text = vRoot["DisplayModeFormat"].asUInt().ToString();
 
 						 txtTURN1_X->Text			=(vRoot["TURN1_X"].asInt().ToString());
 						 txtTURN1_Y->Text 			=(vRoot["TURN1_Y"].asInt().ToString());
@@ -624,6 +689,7 @@ namespace genkeytool {
 				 m_ptSampleOriginX =int::Parse(this->txtSampleOriginX->Text);
 				 m_ptSampleOriginY =int::Parse(this->txtSampleOriginY->Text);
 				 m_nSampleLen = int::Parse(this->txtSampleLen->Text);
+				 
 
 				 TURN1_X			=int::Parse(this->txtTURN1_X->Text );
 				 TURN1_Y			=int::Parse(this->txtTURN1_Y->Text );
@@ -633,14 +699,10 @@ namespace genkeytool {
 
 				 if( m_pBitmap && m_pBitmap->IsValid())
 				 {
-					 HBITMAP bitmap = NULL;
-
-					 m_pBitmap->Save(bitmap);
+					 this->UpdatePictureBox();
 
 
-					 this->picCaptureBmp->Image = Image::FromHbitmap(System::IntPtr((int)bitmap));
-
-					 Graphics^ g = Graphics::FromImage(this->picCaptureBmp->Image);
+					 Graphics^ g = Graphics::FromHwnd(this->panelPic->Handle);
 
 					 Drawing::Pen ^ penRed = gcnew Pen(Color::Red);
 					 Drawing::Pen ^ penGreen = gcnew Pen(Color::Green);
@@ -668,7 +730,6 @@ namespace genkeytool {
 						 }
 					 }
 
-					 this->picCaptureBmp->Refresh();
 				 }
 			 }
 	private: System::Void btnShowRect_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -748,6 +809,8 @@ namespace genkeytool {
 						 vRoot["SampleOriginX"]	= m_ptSampleOriginX ;
 						 vRoot["SampleOriginY"]	= m_ptSampleOriginY;
 						 vRoot["SampleLen"]		= m_nSampleLen;
+						 vRoot["DisplayModeFormat"] = (unsigned int)m_dwDisplayModeFormat;
+						 vRoot["WindowKey"] = m_uWindowKey;
 
 
 						 vRoot["TURN1_X"]	= TURN1_X;
@@ -786,6 +849,7 @@ namespace genkeytool {
 				 lblDrag->Text = "[ ]";
 			 }
 	protected:
+
 		void GetBmpFromHwndGDI(HWND hwnd)
 		{
 
@@ -793,7 +857,7 @@ namespace genkeytool {
 			HBITMAP hbmp = (HBITMAP)GetCurrentObject(hdc, OBJ_BITMAP);
 			this->m_pBitmap->Load(hbmp);
 
-			this->UpdatePictureBox();
+			this->ShowGrid();
 
 			DeleteObject(hbmp);
 			ReleaseDC(hwnd,hdc);
@@ -801,26 +865,20 @@ namespace genkeytool {
 		}
 		void GetBmpFromHwndD3D(HWND hwnd)
 		{
-			Capture3D(hwnd,"capture_tmp.bmp");
+			if( !m_pCapture )
+				return ;
 
-			this->m_pBitmap->Load("capture_tmp.bmp");
+			LPBYTE pData;
 
-			this->UpdatePictureBox();
+			if(!FAILED(m_pCapture->CaptureByD3D(hwnd,&pData)))
+			{
+				this->m_pBitmap->Load(pData);
+				free( pData);
+				this->m_dwDisplayModeFormat = m_pCapture->GetDisplayModeFormat();
+				this->txtDisplayMode->Text  = m_dwDisplayModeFormat.ToString();
+				this->ShowGrid();
+			}
 
-		}
-
-
-		unsigned int GetWindowKey(HWND hwnd)
-		{
-			unsigned int key;
-
-			std::string strHash;
-
-			EnumChildWindows(hwnd, frmGetKey_EnumChildProc, (LPARAM) &strHash);
-
-			key = base::MurmurHash2(strHash.c_str(), strHash.length());
-
-			return key;
 		}
 
 		void OnDragEnd(HWND hwnd )
@@ -832,7 +890,8 @@ namespace genkeytool {
 			//GetBmpFromHwndGDI(hwnd);
 			GetBmpFromHwndD3D(hwnd);
 
-			this->txtWindowInfo->Text = String::Format("WindowKey=:{0:X}", GetWindowKey(hwnd));
+			this->m_uWindowKey = capture::GetWindowKey(hwnd);
+			this->txtWindowKey->Text = m_uWindowKey.ToString();
 		}
 
 		virtual void WndProc(Message% m) override
@@ -851,6 +910,12 @@ namespace genkeytool {
 					 ShowGrid();
 				 }
 			 }
-	};
+	private: System::Void panelPic_SizeChanged(System::Object^  sender, System::EventArgs^  e) {
+				 ShowGrid();
+			 }
+	private: System::Void panelPic_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
+				 ShowGrid();
+			 }
+};
 
 }

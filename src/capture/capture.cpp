@@ -182,8 +182,8 @@ namespace capture
 	{
 		const TCHAR * delimiters = "/\\";
 
-		TCHAR * p;
-		TCHAR * plast;
+		TCHAR * p = filepath;
+		TCHAR * plast = p;
 		p = _tcstok (filepath,delimiters); 
 		while(p!=NULL) 
 		{
@@ -201,6 +201,7 @@ namespace capture
 		TCHAR szBuf[1024];
 		TCHAR szStr[256];
 
+		szStr[0]=0;
 		// Get module file name
 		GetWindowModuleFileName(hwnd, szStr, sizeof(szStr));
 
@@ -220,6 +221,7 @@ namespace capture
 
 		EnumChildWindows(hwnd, _Capture_EnumChildProc, (LPARAM) &strHash);
 
+		OutputDebugString(strHash.c_str());
 		key = base::MurmurHash2(strHash.c_str(), strHash.length());
 
 		return key;

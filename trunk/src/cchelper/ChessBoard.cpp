@@ -19,6 +19,9 @@ CChessBoard::CChessBoard()
 {
 	m_pGameWindow = NULL;
 	m_pChessEngine = NULL;
+	
+	m_nRegistedGameWindowNum = 0;
+	memset(m_pRegistedGameWindows, 0, sizeof(m_pRegistedGameWindows));
 
 	m_bAlarmFlage = FALSE;
 	m_pBoardDIB	= NULL;
@@ -29,8 +32,54 @@ CChessBoard::CChessBoard()
 
 CChessBoard::~CChessBoard()
 {
+	for( int i=0; i< m_nRegistedGameWindowNum ; i++)
+	{
+		if( m_pRegistedGameWindows[i])
+		{
+			delete m_pRegistedGameWindows[i];
+			m_pRegistedGameWindows[i] = NULL;
+		}
+	}
+
 	ReleaseMedia();
 }
+
+
+void CChessBoard::RegisterGameWindow(IGameWindow * p)
+{
+	m_pRegistedGameWindows[m_nRegistedGameWindowNum++] = p;
+}
+
+BOOL CALLBACK CChessBoard::MyEnumWindowsProc( HWND hwnd,    LPARAM lParam)
+{
+	IGameWindow * pGameWindow = (IGameWindow*) lParam;
+
+	if( pGameWindow->Attach(hwnd) )
+	{
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+
+
+IGameWindow* CChessBoard::SearchGameWindow() 
+{
+	for( int i = 0; i< m_nRegistedGameWindowNum; i++)
+	{
+		if( m_pRegistedGameWindows[i] )
+		{
+			EnumWindows( CChessBoard::MyEnumWindowsProc,(LPARAM)m_pRegistedGameWindows[i]);
+			if( m_pRegistedGameWindows[i]->GetHandle() )
+			{
+				SetGameWindow(m_pRegistedGameWindows[i]);
+				return this->GetGameWindow();
+			}
+		}
+	}
+	return NULL;
+}
+
 
 void CChessBoard::GetBoardSize(SIZE * size)
 {

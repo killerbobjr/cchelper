@@ -6,7 +6,7 @@
 // DEFINES
 //___________________________________________________________________________s
 
-
+#define GAMEWINDOW_MAXLEN	(10)
 
 #define PIECE_NUM	(14)
 
@@ -46,7 +46,16 @@ public:
 
 
 private:
+	int m_nRegistedGameWindowNum;
+	IGameWindow * m_pRegistedGameWindows[GAMEWINDOW_MAXLEN];
+	static BOOL CALLBACK MyEnumWindowsProc( HWND hwnd, LPARAM lParam);
 
+public:
+	void RegisterGameWindow(IGameWindow * p);
+	IGameWindow* SearchGameWindow() ;
+
+	
+private:
 	IGameWindow * m_pGameWindow;
 	IChessEngine * m_pChessEngine;
 

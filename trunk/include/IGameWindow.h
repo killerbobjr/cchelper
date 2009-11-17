@@ -27,18 +27,11 @@ struct GAMEWINDOWINFO
 // Interface of game window.
 // Find and maintain the handle of the actual game window. 
 //________________________________________________________________________________________
-#define GAMEWINDOW_MAXLEN	(10)
 class IGameWindow
 {
-public:
-	static int nGameWindowNum;
-	static IGameWindow * pGameWindows[GAMEWINDOW_MAXLEN];
-
-	static void AddGameWindow(IGameWindow * p);
-	static IGameWindow * SearchGameWindow() ;
-	static void ReleaseAllGameWindow();
 
 protected:
+
 
 	IChessEngine * m_pChessEngine;			//Point of chess engine.
 	GAMEWINDOWINFO	m_GameWindowInfo;		//Contain the game window information.
@@ -106,7 +99,7 @@ public:
 	//_________________________________________________________________________________________
 	virtual HWND GetFrameWindowHandle() = 0;
 
-	virtual HWND FindGameWindow() = 0;
+	virtual bool Attach(HWND hwnd) = 0;
 
 	virtual bool LoadHashValue(TCHAR * szFile) = 0;
 };

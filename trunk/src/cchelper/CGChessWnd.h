@@ -10,31 +10,8 @@ class CBitmapEx;
 class CGChessWnd : public IGameWindow
 {
 public :
-	enum QncDlgItemEnum
-	{
-		QNC_START_BTN	=	0,
-		QNC_DRAWN_BTN	=	1,
-		QNC_LOST_BTN	=	2,
-		QNC_RETRACT		=  3,
-		QNC_TOOLS_BTN	=	4,
-		QNC_DISCS_BTN	=	5,
-		QNC_ITEMSIZE		
-	};
-
-
-	struct QncDlgItemInfo
-	{
-		INT			nID;
-		LPTSTR		szWindowClass;
-		POINT		ptSize;
-	};
 
 protected:
-	static QncDlgItemInfo _QncItemsInfo[QNC_ITEMSIZE];
-
-	TCHAR m_szWindowClass[256];
-
-	HWND m_hwndItems[QNC_ITEMSIZE];
 
 	HWND m_hwndMain;
 
@@ -113,7 +90,6 @@ public:
 
 	virtual HWND GetFrameWindowHandle() { return m_hwndFrame; }
 
-	virtual HWND FindGameWindow();
 	DWORD CGChessWnd::GetHashValue( int x, int y, int len );
 
 

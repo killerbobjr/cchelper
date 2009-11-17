@@ -20,8 +20,6 @@ using namespace base;
 
 CChessEngine	* g_pChessEngine = NULL;
 CChessBoard		* g_pChessBoard = NULL;
-HHOOK			g_hHookPlay = NULL;
-HHOOK			g_hHookGetMessage = NULL;
 
 // GLOBAL FUNCTION
 //_____________________________________________________________________________
@@ -95,18 +93,18 @@ BOOL InitApp()
 		return FALSE;
 	}
 
-	IGameWindow::AddGameWindow(pGameWnd);
+	g_pChessBoard->RegisterGameWindow(pGameWnd);
 
 
 	// add china game chess window
 	pGameWnd = new CGChessWnd();
 
-	if(!pGameWnd->LoadHashValue(_T("hv_cg.ini")))
+	if(!pGameWnd->LoadHashValue(_T("hv_cg_22.ini")))
 	{
 		return FALSE;
 	}
 
-	IGameWindow::AddGameWindow(pGameWnd);
+	g_pChessBoard->RegisterGameWindow(pGameWnd);
 
 
 	if(g_pChessEngine->InitEngine(AppEnv::szEngine))
@@ -119,7 +117,6 @@ BOOL InitApp()
 		return FALSE;
 	}
 
-	//CMouseHook::StartHook(g_hWndMain);
 
 	assert(g_pChessEngine->IsLoaded() );
 
@@ -135,7 +132,7 @@ BOOL AppLoop()
 
 	if( !pgw )
 	{
-		pgw = IGameWindow::SearchGameWindow();
+		pgw = g_pChessBoard->SearchGameWindow();
 		if( pgw )
 		{
 			g_pChessBoard->SetGameWindow(pgw);
@@ -153,8 +150,6 @@ BOOL AppLoop()
 BOOL ExitApp()
 {
 	if( g_pChessBoard ) delete g_pChessBoard;
-
-	IGameWindow::ReleaseAllGameWindow();
 
 	if ( g_pChessEngine) delete g_pChessEngine;
 

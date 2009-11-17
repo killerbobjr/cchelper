@@ -7,9 +7,9 @@
 #include "fastdib.h"
 #include "app.h"
 #include "appenv.h"
+#include "mousehook.h"
 #include <Ole2.h>
 #include <mmsystem.h>
-
 // STRUCTS
 //___________________________________________________________________________
 struct WindowInformation
@@ -101,6 +101,8 @@ BOOL doInit(HINSTANCE hInstance, int nCmdShow)
 	if(!InitApp())
 		return FALSE;
 
+	CMouseHook::UWM_DRAGEEND = RegisterWindowMessage(UWM_DRAGEND_MSG);
+	
 	g_bInitialized = TRUE;
 
     ShowWindow(g_hWndMain, nCmdShow);
@@ -246,7 +248,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CCHELPER));
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+	wcex.hCursor		= NULL;
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_CCHELPER);
 	wcex.lpszClassName	= szWindowClass;
@@ -257,13 +259,24 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 
 
-LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static BOOL bAlarm = FALSE;
 
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
+
+	if( message == CMouseHook::UWM_DRAGEEND)
+	{
+		SetCapture(NULL);
+		SetCursor(LoadCursor(NULL,IDC_ARROW));
+		CMouseHook::StopHook();
+		if( g_pChessBoard )
+		{
+			g_pChessBoard->GetGameWindow();
+		}
+	}
 
 	switch (message)
 	{
@@ -280,10 +293,10 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 			break;
 		case IDM_ABOUT:
 			//test();
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), g_hWndMain, About);
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
 			break;
 		case IDM_EXIT:
-			DestroyWindow(g_hWndMain);
+			DestroyWindow(hwnd);
 			break;
 		case IDM_SEC5:
 			AppEnv::nThinkTime = 5;			
@@ -315,16 +328,19 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		break;
 
 	case WM_PAINT:
-		hdc = BeginPaint(g_hWndMain, &ps);
+		hdc = BeginPaint(hwnd, &ps);
 
 		if ( g_pMainSurface  )
 		{
 			g_pMainSurface->FastBlt(hdc);
 		}
 
-		EndPaint(g_hWndMain, &ps);
+		EndPaint(hwnd, &ps);
 		break;
-	case WM_LBUTTONUP:
+	case WM_LBUTTONDOWN:
+		SetCapture(hwnd);
+		SetCursor(LoadCursor(NULL,IDC_CROSS));
+		CMouseHook::StartHook(hwnd);
 		break;
 	//case WM_KEYUP:
 	//		vk = (int) wParam;
@@ -346,7 +362,7 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		{
 		case APPUPDATE_TIMER:
 			if (!AppLoop()) {
-			    DestroyWindow(g_hWndMain);
+			    DestroyWindow(hwnd);
 			}
 			doUpdate();
 
@@ -365,7 +381,7 @@ LRESULT CALLBACK WndProc(HWND g_hWndMain, UINT message, WPARAM wParam, LPARAM lP
 		PostQuitMessage(0);
 		break;
 	default:
-		return DefWindowProc(g_hWndMain, message, wParam, lParam);
+		return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 	return 0;
 }

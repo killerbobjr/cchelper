@@ -104,7 +104,7 @@ public:
 
 	virtual HWND GetFrameWindowHandle() { return m_hwndFrame; }
 
-	virtual HWND FindGameWindow();
+	//virtual HWND FindGameWindow();
 	DWORD CQQNewChessWnd::GetHashValue( int x, int y, int len );
 
 

@@ -104,9 +104,11 @@ public:
 
 	virtual HWND GetFrameWindowHandle() { return m_hwndFrame; }
 
-	//virtual HWND FindGameWindow();
+	HWND FindGameWindow();
+
 	DWORD CQQNewChessWnd::GetHashValue( int x, int y, int len );
 
+	virtual HWND SearchGameWindow();
 
 	friend BOOL CALLBACK QQNewChessWnd_EnumChildProc( HWND hwnd,  LPARAM lParam);
 

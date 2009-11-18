@@ -267,16 +267,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 
-	if( message == CMouseHook::UWM_DRAGEEND)
-	{
-		SetCapture(NULL);
-		SetCursor(LoadCursor(NULL,IDC_ARROW));
-		CMouseHook::StopHook();
-		if( g_pChessBoard )
-		{
-			g_pChessBoard->GetGameWindow();
-		}
-	}
+	//if( message == CMouseHook::UWM_DRAGEEND)
+	//{
+	//	SetCapture(NULL);
+	//	SetCursor(LoadCursor(NULL,IDC_ARROW));
+	//	CMouseHook::StopHook();
+	//	if( g_pChessBoard )
+	//	{
+	//		g_pChessBoard->GetGameWindow();
+	//	}
+	//}
 
 	switch (message)
 	{
@@ -338,9 +338,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hwnd, &ps);
 		break;
 	case WM_LBUTTONDOWN:
-		SetCapture(hwnd);
-		SetCursor(LoadCursor(NULL,IDC_CROSS));
-		CMouseHook::StartHook(hwnd);
+		//SetCapture(hwnd);
+		//SetCursor(LoadCursor(NULL,IDC_CROSS));
+		//CMouseHook::StartHook(hwnd);
 		break;
 	//case WM_KEYUP:
 	//		vk = (int) wParam;

@@ -99,7 +99,7 @@ BOOL InitApp()
 	// add china game chess window
 	pGameWnd = new CGChessWnd();
 
-	if(!pGameWnd->LoadHashValue(_T("hv_cg_22.ini")))
+	if(!pGameWnd->LoadHashValue(_T("hv_cg_22_test.ini")))
 	{
 		return FALSE;
 	}

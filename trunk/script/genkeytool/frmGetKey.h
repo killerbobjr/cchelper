@@ -17,9 +17,11 @@ using namespace System::Drawing;
 #include "MurmurHash.h"
 #include "MouseHook.h"
 #include "capture.h"
+#include "Psapi.h"
+
 
 using namespace StringUtilities;
-using namespace capture;
+
 
 namespace genkeytool {
 
@@ -73,6 +75,7 @@ namespace genkeytool {
 	private: System::Windows::Forms::TextBox^  txtWindowKey;
 	private: System::Windows::Forms::Label^  label12;
 	private: System::Windows::Forms::TextBox^  txtDisplayMode;
+	private: System::Windows::Forms::Button^  btnSearchWindow;
 
 	private: System::Windows::Forms::Button^  btnFont;
 
@@ -167,6 +170,7 @@ namespace genkeytool {
 		{
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->btnFont = (gcnew System::Windows::Forms::Button());
+			this->btnSearchWindow = (gcnew System::Windows::Forms::Button());
 			this->btnShowRect = (gcnew System::Windows::Forms::Button());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->txtWindowInfo = (gcnew System::Windows::Forms::TextBox());
@@ -211,6 +215,7 @@ namespace genkeytool {
 			// panel1
 			// 
 			this->panel1->Controls->Add(this->btnFont);
+			this->panel1->Controls->Add(this->btnSearchWindow);
 			this->panel1->Controls->Add(this->btnShowRect);
 			this->panel1->Controls->Add(this->panel3);
 			this->panel1->Controls->Add(this->label12);
@@ -247,7 +252,7 @@ namespace genkeytool {
 			// 
 			// btnFont
 			// 
-			this->btnFont->Location = System::Drawing::Point(18, 363);
+			this->btnFont->Location = System::Drawing::Point(18, 352);
 			this->btnFont->Name = L"btnFont";
 			this->btnFont->Size = System::Drawing::Size(50, 21);
 			this->btnFont->TabIndex = 5;
@@ -255,9 +260,19 @@ namespace genkeytool {
 			this->btnFont->UseVisualStyleBackColor = true;
 			this->btnFont->Click += gcnew System::EventHandler(this, &frmGetKey::btnFont_Click);
 			// 
+			// btnSearchWindow
+			// 
+			this->btnSearchWindow->Location = System::Drawing::Point(18, 379);
+			this->btnSearchWindow->Name = L"btnSearchWindow";
+			this->btnSearchWindow->Size = System::Drawing::Size(157, 23);
+			this->btnSearchWindow->TabIndex = 4;
+			this->btnSearchWindow->Text = L"Search Window";
+			this->btnSearchWindow->UseVisualStyleBackColor = true;
+			this->btnSearchWindow->Click += gcnew System::EventHandler(this, &frmGetKey::btnSearchWindow_Click);
+			// 
 			// btnShowRect
 			// 
-			this->btnShowRect->Location = System::Drawing::Point(80, 362);
+			this->btnShowRect->Location = System::Drawing::Point(80, 351);
 			this->btnShowRect->Name = L"btnShowRect";
 			this->btnShowRect->Size = System::Drawing::Size(95, 23);
 			this->btnShowRect->TabIndex = 4;
@@ -274,9 +289,9 @@ namespace genkeytool {
 			this->panel3->Controls->Add(this->btnSaveSetting);
 			this->panel3->Controls->Add(this->btnSelectFile);
 			this->panel3->Dock = System::Windows::Forms::DockStyle::Bottom;
-			this->panel3->Location = System::Drawing::Point(0, 402);
+			this->panel3->Location = System::Drawing::Point(0, 408);
 			this->panel3->Name = L"panel3";
-			this->panel3->Size = System::Drawing::Size(181, 141);
+			this->panel3->Size = System::Drawing::Size(181, 135);
 			this->panel3->TabIndex = 3;
 			// 
 			// txtWindowInfo
@@ -297,6 +312,7 @@ namespace genkeytool {
 			this->lblDrag->Size = System::Drawing::Size(26, 16);
 			this->lblDrag->TabIndex = 2;
 			this->lblDrag->Text = L"[+]";
+			this->lblDrag->Click += gcnew System::EventHandler(this, &frmGetKey::lblDrag_Click);
 			this->lblDrag->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &frmGetKey::lblDrag_MouseDown);
 			// 
 			// btnLoadSetting
@@ -440,7 +456,6 @@ namespace genkeytool {
 			// txtDisplayMode
 			// 
 			this->txtDisplayMode->AcceptsReturn = true;
-			this->txtDisplayMode->Enabled = false;
 			this->txtDisplayMode->Location = System::Drawing::Point(101, 326);
 			this->txtDisplayMode->Name = L"txtDisplayMode";
 			this->txtDisplayMode->Size = System::Drawing::Size(74, 19);
@@ -448,7 +463,6 @@ namespace genkeytool {
 			// 
 			// txtWindowKey
 			// 
-			this->txtWindowKey->Enabled = false;
 			this->txtWindowKey->Location = System::Drawing::Point(101, 301);
 			this->txtWindowKey->Name = L"txtWindowKey";
 			this->txtWindowKey->Size = System::Drawing::Size(74, 19);
@@ -587,31 +601,6 @@ namespace genkeytool {
 			 }
 	private: System::Void UpdatePictureBox()
 			 {
-				 //HBITMAP bitmap = NULL;
-				 //try
-				 //{
-
-
-				 // m_pBitmap->Save(bitmap);
-					// 
-
-				 // this->picCaptureBmp->Image = Bitmap::FromHbitmap(System::IntPtr((int)bitmap));
-
-				 // this->picCaptureBmp->Refresh();
-				 //}
-				 //catch(System::Exception ^ e)
-				 //{
-				 // if(bitmap)
-				 //	 DeleteObject(bitmap);
-
-				 // System::Diagnostics::Debug::Print(e->Message);
-				 //}
-
-				 //HDC hdc = GetDC((HWND)this->picCaptureBmp->Handle.ToInt32());
-				 //m_pBitmap->Draw(hdc);
-				 //ReleaseDC((HWND)this->picCaptureBmp->Handle.ToInt32(), hdc);
-
-
 				 HDC hdc = GetDC((HWND)this->panelPic->Handle.ToInt32());
 				 m_pBitmap->Draw(hdc);
 				 ReleaseDC((HWND)this->panelPic->Handle.ToInt32(), hdc);
@@ -689,7 +678,7 @@ namespace genkeytool {
 				 m_ptSampleOriginX =int::Parse(this->txtSampleOriginX->Text);
 				 m_ptSampleOriginY =int::Parse(this->txtSampleOriginY->Text);
 				 m_nSampleLen = int::Parse(this->txtSampleLen->Text);
-				 
+
 
 				 TURN1_X			=int::Parse(this->txtTURN1_X->Text );
 				 TURN1_Y			=int::Parse(this->txtTURN1_Y->Text );
@@ -843,7 +832,7 @@ namespace genkeytool {
 
 	private: System::Void lblDrag_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
 				 this->Cursor = Cursors::Cross ;
-				 CMouseHook::StartHook((HWND)this->Handle.ToInt32());	
+				 CMouseHook::StartHook((HWND)this->Handle.ToInt32());
 				 lblDrag->Text = "[ ]";
 			 }
 	protected:
@@ -865,29 +854,77 @@ namespace genkeytool {
 			if( !m_pCapture )
 				return ;
 
-			LPBYTE pData;
-
-			if(!FAILED(m_pCapture->CaptureByD3D(hwnd,&pData)))
+			if(!FAILED(m_pCapture->CaptureByD3D(hwnd,"capture_tmp.bmp")))
 			{
-				this->m_pBitmap->Load(pData);
-				free( pData);
+				this->m_pBitmap->Load("capture_tmp.bmp");
 				this->m_dwDisplayModeFormat = m_pCapture->GetDisplayModeFormat();
 				this->txtDisplayMode->Text  = m_dwDisplayModeFormat.ToString();
 				this->ShowGrid();
 			}
 		}
 
+		void ErrorMessage(LPTSTR lpszFunction) 
+		{ 
+			// Retrieve the system error message for the last-error code
+
+			LPVOID lpMsgBuf;
+			LPVOID lpDisplayBuf;
+			DWORD dw = GetLastError(); 
+
+			FormatMessage(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+				FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				dw,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPTSTR) &lpMsgBuf,
+				0, NULL );
+
+			// Display the error message and exit the process
+
+			lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
+				(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR)); 
+			_stprintf((LPTSTR)lpDisplayBuf, 
+				TEXT("%s failed with error %d: %s"), 
+				lpszFunction, dw, lpMsgBuf); 
+			::MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+
+			LocalFree(lpMsgBuf);
+			LocalFree(lpDisplayBuf);
+		}
+
 		void OnDragEnd(HWND hwnd )
 		{
 			this->Cursor = Cursors::Default ;
 			CMouseHook::StopHook();
-			lblDrag->Text = "[+]";		
+			lblDrag->Text = "[+]";
 
 			//GetBmpFromHwndGDI(hwnd);
 			GetBmpFromHwndD3D(hwnd);
 
-			this->m_uWindowKey = capture::GetWindowKey(hwnd);
+			this->m_uWindowKey = ScreenCapture::GetWindowKey(hwnd);
 			this->txtWindowKey->Text = m_uWindowKey.ToString();
+
+			TCHAR szBuf[256] = {0};
+
+			DWORD dwProcessId;
+			DWORD dwThreadId = GetWindowThreadProcessId(hwnd, &dwProcessId);
+			HANDLE hProcess;
+
+			hProcess = OpenProcess( PROCESS_ALL_ACCESS , FALSE, dwProcessId );
+
+			if(!GetModuleFileNameEx(hProcess, NULL, szBuf, sizeof(szBuf)))
+			{
+				ErrorMessage("GetModuleFileNameEx");
+				//System::Diagnostics::Debug::WriteLine("error message:" + GetLastError().ToString());
+			}else
+			{
+				this->txtWindowInfo->Text = StringConvertor(szBuf);
+				::SetWindowText(hwnd, szBuf);
+			}
+			if(hProcess)
+				CloseHandle(hProcess);
 		}
 
 		virtual void WndProc(Message% m) override
@@ -912,6 +949,21 @@ namespace genkeytool {
 	private: System::Void panelPic_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
 				 ShowGrid();
 			 }
-};
+	private: System::Void btnSearchWindow_Click(System::Object^  sender, System::EventArgs^  e) {
+				 TCHAR szTitle[256];
+				 HWND hwnd = m_pCapture->SearchWindow(this->m_uWindowKey, true);
+				 if( hwnd )
+				 {
+					 GetWindowText(hwnd, szTitle, sizeof(szTitle));
+					 MessageBox::Show(StringConvertor(szTitle) + "hwnd" + ((unsigned int)hwnd).ToString() );
+				 }
+				 else
+				 {
+					 MessageBox::Show("Not found");
+				 }
+			 }
+	private: System::Void lblDrag_Click(System::Object^  sender, System::EventArgs^  e) {
+			 }
+	};
 
 }

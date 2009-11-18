@@ -99,7 +99,9 @@ public:
 	//_________________________________________________________________________________________
 	virtual HWND GetFrameWindowHandle() = 0;
 
-	virtual bool Attach(HWND hwnd) = 0;
+	//virtual bool Attach(HWND hwnd) = 0;
+
+	virtual HWND SearchGameWindow() = 0;
 
 	virtual bool LoadHashValue(TCHAR * szFile) = 0;
 };

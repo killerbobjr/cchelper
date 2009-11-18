@@ -6,6 +6,8 @@
 #include <tchar.h>
 #include "MurmurHash.h"
 #include "capture.h"
+#include <list>
+#include "log.h"
 
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
@@ -175,56 +177,139 @@ Cleanup:
 	return hr;
 }
 
-namespace capture
+TCHAR * GetFileName(TCHAR * filepath)
 {
+	const TCHAR * delimiters = "/\\";
 
-	TCHAR * GetFileName(TCHAR * filepath)
+	TCHAR * p = filepath;
+	TCHAR * plast = p;
+	p = _tcstok (filepath,delimiters); 
+	while(p!=NULL) 
 	{
-		const TCHAR * delimiters = "/\\";
+		plast = p;
+		p = _tcstok(NULL,delimiters); 
+	}
+	return plast;
+}
 
-		TCHAR * p = filepath;
-		TCHAR * plast = p;
-		p = _tcstok (filepath,delimiters); 
-		while(p!=NULL) 
-		{
-			plast = p;
-			p = _tcstok(NULL,delimiters); 
-		}
-		return plast;
+
+BOOL CALLBACK _Capture_EnumChildProc(HWND hwnd,  LPARAM lParam)
+{
+	std::list<std::string> * plistStr = (std::list<std::string> * )lParam;
+
+	TCHAR szBuf[1024];
+	TCHAR szStr[256];
+
+	szStr[0]=0;
+	// Get module file name
+	GetWindowModuleFileName(hwnd, szStr, sizeof(szStr));
+
+	_stprintf(szBuf,"%s_0x%x",GetFileName(szStr), GetDlgCtrlID(hwnd));
+
+	plistStr->push_back(szBuf);
+
+
+	return TRUE;
+}
+
+
+unsigned int ScreenCapture::GetWindowKey(HWND hwnd)
+{
+	unsigned int key;
+
+	std::list<std::string> lstStr;
+
+	TCHAR szBuf[1024];
+	TCHAR szStr[256] = {0};
+
+	szStr[0]=0;
+	// Get module file name
+
+	DWORD dwProcessId;
+	DWORD dwThreadId = GetWindowThreadProcessId(hwnd, &dwProcessId);
+	HANDLE hProcess;
+
+	hProcess = OpenProcess( PROCESS_ALL_ACCESS , FALSE, dwProcessId );
+
+	if(GetModuleFileNameEx(hProcess, NULL, szBuf, sizeof(szBuf)))
+	{
+		if(hProcess)
+			CloseHandle(hProcess);
 	}
 
+	_stprintf(szBuf,"%s,0x%x",GetFileName(szStr), GetDlgCtrlID(hwnd));
 
-	BOOL CALLBACK _Capture_EnumChildProc(HWND hwnd,  LPARAM lParam)
+	lstStr.push_back(szBuf);
+
+	EnumChildWindows(hwnd, _Capture_EnumChildProc, (LPARAM) &lstStr);
+
+	lstStr.sort();
+
+	std::string strHash;
+
+	std::list<std::string>::iterator i;
+	for( i = lstStr.begin() ; i != lstStr.end(); i ++)
 	{
-		std::string * pStr = (std::string*)lParam;
+		strHash.append(i->c_str());
+	}
+	
 
-		TCHAR szBuf[1024];
-		TCHAR szStr[256];
+	key = base::MurmurHash2(strHash.c_str(), strHash.length());
 
-		szStr[0]=0;
-		// Get module file name
-		GetWindowModuleFileName(hwnd, szStr, sizeof(szStr));
+	return key;
+}
 
-		_stprintf(szBuf,"%s,0x%x",GetFileName(szStr), GetDlgCtrlID(hwnd));
 
-		pStr->append(szBuf);
+BOOL CALLBACK ScreenCaptureSearch_EnumChildProc( HWND hwnd,  LPARAM lParam)
+{
+	ScreenCapture * pCap = (ScreenCapture *) lParam;
 
-		return TRUE;
+	// If already found target window, then return FALSE to terminate
+	// current searching.
+	if( pCap->m_hwnd )
+	{
+		return FALSE;
 	}
 
-
-	unsigned int GetWindowKey(HWND hwnd)
+	if( ScreenCapture::GetWindowKey(hwnd) == pCap->m_uWindowKey)
 	{
-		unsigned int key;
-
-		std::string strHash;
-
-		EnumChildWindows(hwnd, _Capture_EnumChildProc, (LPARAM) &strHash);
-
-		OutputDebugString(strHash.c_str());
-		key = base::MurmurHash2(strHash.c_str(), strHash.length());
-
-		return key;
+		pCap->m_hwnd  = hwnd;
+		return FALSE;
 	}
 
+	return TRUE;
+}
+
+
+BOOL CALLBACK ScreenCaptureSearch_EnumWindowsProc( HWND hwnd,LPARAM lParam)
+{
+	ScreenCapture * pCap = (ScreenCapture*) lParam;
+
+	// If already found target window, then return FALSE to terminate
+	// current searching.
+	if( pCap->m_hwnd )
+		return FALSE;
+
+	if(ScreenCapture::GetWindowKey(hwnd) == pCap->m_uWindowKey )
+	{
+		pCap->m_hwnd = hwnd;
+		return FALSE;
+	}
+
+	if( pCap->m_bSearchSubWindow )
+	{
+		ScreenCaptureSearch_EnumChildProc(hwnd, (LPARAM)lParam);
+	}
+
+	return TRUE;
+}
+
+HWND ScreenCapture::SearchWindow(unsigned int uWindowKey, bool bSearchSubWindow )
+{
+	this->m_bSearchSubWindow = bSearchSubWindow;
+	this->m_hwnd = NULL;
+	this->m_uWindowKey = uWindowKey;
+	EnumWindows(ScreenCaptureSearch_EnumWindowsProc,(LPARAM)this);
+	
+	return this->m_hwnd ;
 }

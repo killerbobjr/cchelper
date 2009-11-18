@@ -88,6 +88,8 @@ public:
 		return NULL; 
 	}
 
+	virtual HWND SearchGameWindow(void);
+
 	virtual HWND GetFrameWindowHandle() { return m_hwndFrame; }
 
 	DWORD CGChessWnd::GetHashValue( int x, int y, int len );

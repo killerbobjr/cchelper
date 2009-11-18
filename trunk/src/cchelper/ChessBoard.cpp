@@ -50,17 +50,18 @@ void CChessBoard::RegisterGameWindow(IGameWindow * p)
 	m_pRegistedGameWindows[m_nRegistedGameWindowNum++] = p;
 }
 
-BOOL CALLBACK CChessBoard::MyEnumWindowsProc( HWND hwnd,    LPARAM lParam)
-{
-	IGameWindow * pGameWindow = (IGameWindow*) lParam;
-
-	if( pGameWindow->Attach(hwnd) )
-	{
-		return FALSE;
-	}
-	
-	return TRUE;
-}
+//
+//BOOL CALLBACK CChessBoard::MyEnumWindowsProc( HWND hwnd,    LPARAM lParam)
+//{
+//	IGameWindow * pGameWindow = (IGameWindow*) lParam;
+//
+//	if( pGameWindow->Attach(hwnd) )
+//	{
+//		return FALSE;
+//	}
+//	
+//	return TRUE;
+//}
 
 
 IGameWindow* CChessBoard::SearchGameWindow() 
@@ -69,12 +70,17 @@ IGameWindow* CChessBoard::SearchGameWindow()
 	{
 		if( m_pRegistedGameWindows[i] )
 		{
-			EnumWindows( CChessBoard::MyEnumWindowsProc,(LPARAM)m_pRegistedGameWindows[i]);
-			if( m_pRegistedGameWindows[i]->GetHandle() )
+			if(m_pRegistedGameWindows[i]->SearchGameWindow())
 			{
-				SetGameWindow(m_pRegistedGameWindows[i]);
-				return this->GetGameWindow();
+				return m_pRegistedGameWindows[i];
 			}
+
+			//EnumWindows( CChessBoard::MyEnumWindowsProc,(LPARAM)m_pRegistedGameWindows[i]);
+			//if( m_pRegistedGameWindows[i]->GetHandle() )
+			//{
+			//	SetGameWindow(m_pRegistedGameWindows[i]);
+			//	return this->GetGameWindow();
+			//}
 		}
 	}
 	return NULL;
@@ -461,41 +467,3 @@ void CChessBoard::KillAlarm()
 		m_bAlarmFlage = FALSE;
 	}
 }
-
-
-/*
-void CChessBoard::DrawBoard( IGameWindow * pgw )
-{
-	assert(pgw && g_pMainSurface && m_pBoardDIB);
-
-	if( !pgw->GetHandle() )
-	{
-		return ;
-	}
-
-	int p;
-	int x;
-	int y;
-
-	g_pMainSurface->ClearImage();
-	m_pBoardDIB->Draw( g_pMainSurface );
-
-	for( y =0; y < 10; y++ )
-	{
-		for( x = 0; x < 9; x ++)
-		{
-			p = pgw->GetPiece(x,y);
-			if ( p )	this->DrawPiece(p, x, y);
-		}
-	}
-	
-	int turn = pgw->GetTurn();
-	if( turn == 'b' )
-	{
-		this->DrawPiece( 'k' , 9, 1 );
-	} else if ( turn == 'w' )
-	{
-		this->DrawPiece( 'K' , 9, 1 );
-	}
-}
-*/

@@ -212,48 +212,44 @@ BOOL CALLBACK _Capture_EnumChildProc(HWND hwnd,  LPARAM lParam)
 	return TRUE;
 }
 
+void GetWindowKeyString(HWND hwnd, std::string& strHash)
+{
+
+	TCHAR szStr[1024]={0};
+
+	// Get module file name
+	DWORD dwProcessId;
+	DWORD dwThreadId = GetWindowThreadProcessId(hwnd, &dwProcessId);
+	HANDLE hProcess;
+
+	hProcess = OpenProcess( PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, dwProcessId );
+
+	GetModuleBaseName(hProcess, NULL, szStr, sizeof(szStr));
+	strHash.append(GetFileName(szStr));
+
+	GetProcessImageFileName(hProcess, szStr, sizeof(szStr));
+	strHash.append(GetFileName(szStr));
+
+	if(hProcess)
+		CloseHandle(hProcess);
+
+	HWND hwndParent = GetParent(hwnd);
+	if(hwndParent)
+	{
+		GetWindowKeyString(hwndParent, strHash);
+	}
+}
 
 unsigned int ScreenCapture::GetWindowKey(HWND hwnd)
 {
 	unsigned int key;
 
-	std::list<std::string> lstStr;
-
-	TCHAR szBuf[1024];
-	TCHAR szStr[256] = {0};
-
-	szStr[0]=0;
-	// Get module file name
-
-	DWORD dwProcessId;
-	DWORD dwThreadId = GetWindowThreadProcessId(hwnd, &dwProcessId);
-	HANDLE hProcess;
-
-	hProcess = OpenProcess( PROCESS_ALL_ACCESS , FALSE, dwProcessId );
-
-	if(GetModuleFileNameEx(hProcess, NULL, szBuf, sizeof(szBuf)))
-	{
-		if(hProcess)
-			CloseHandle(hProcess);
-	}
-
-	_stprintf(szBuf,"%s,0x%x",GetFileName(szStr), GetDlgCtrlID(hwnd));
-
-	lstStr.push_back(szBuf);
-
-	EnumChildWindows(hwnd, _Capture_EnumChildProc, (LPARAM) &lstStr);
-
-	lstStr.sort();
-
 	std::string strHash;
 
-	std::list<std::string>::iterator i;
-	for( i = lstStr.begin() ; i != lstStr.end(); i ++)
-	{
-		strHash.append(i->c_str());
-	}
-	
+	// Get module file name	
+	GetWindowKeyString(hwnd, strHash);
 
+	//OutputDebugString(strHash.c_str());
 	key = base::MurmurHash2(strHash.c_str(), strHash.length());
 
 	return key;

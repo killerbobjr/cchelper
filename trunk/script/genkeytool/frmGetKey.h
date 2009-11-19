@@ -905,26 +905,6 @@ namespace genkeytool {
 
 			this->m_uWindowKey = ScreenCapture::GetWindowKey(hwnd);
 			this->txtWindowKey->Text = m_uWindowKey.ToString();
-
-			TCHAR szBuf[256] = {0};
-
-			DWORD dwProcessId;
-			DWORD dwThreadId = GetWindowThreadProcessId(hwnd, &dwProcessId);
-			HANDLE hProcess;
-
-			hProcess = OpenProcess( PROCESS_ALL_ACCESS , FALSE, dwProcessId );
-
-			if(!GetModuleFileNameEx(hProcess, NULL, szBuf, sizeof(szBuf)))
-			{
-				ErrorMessage("GetModuleFileNameEx");
-				//System::Diagnostics::Debug::WriteLine("error message:" + GetLastError().ToString());
-			}else
-			{
-				this->txtWindowInfo->Text = StringConvertor(szBuf);
-				::SetWindowText(hwnd, szBuf);
-			}
-			if(hProcess)
-				CloseHandle(hProcess);
 		}
 
 		virtual void WndProc(Message% m) override
